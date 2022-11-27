@@ -6,7 +6,7 @@
 set -e
 
 . $(dirname "$(realpath "$0")")/properties.sh
-: "${TERMUX_PREFIX:="/data/data/com.termux/files/usr"}"
+: "${TERMUX_PREFIX:="/data/data/com.vmos.pro/osimg/r/ot01/data/data/com.termux/files/usr"}"
 BOOTSTRAP_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-tmp.XXXXXXXX")
 trap 'rm -rf $BOOTSTRAP_TMPDIR' EXIT
 
