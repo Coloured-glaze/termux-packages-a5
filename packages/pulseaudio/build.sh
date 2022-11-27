@@ -1,32 +1,39 @@
 TERMUX_PKG_HOMEPAGE=https://www.freedesktop.org/wiki/Software/PulseAudio
 TERMUX_PKG_DESCRIPTION="A featureful, general-purpose sound server"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_SRCURL=https://github.com/pulseaudio/pulseaudio.git
-TERMUX_PKG_VERSION=16.1
-TERMUX_PKG_REVISION=2
-TERMUX_PKG_DEPENDS="libandroid-execinfo, libandroid-glob, libc++, libltdl, libsndfile, libsoxr, libwebrtc-audio-processing, speexdsp"
+TERMUX_PKG_VERSION=13.0
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=961b23ca1acfd28f2bc87414c27bb40e12436efcf2158d29721b1e89f3f28057
+TERMUX_PKG_DEPENDS="libltdl, libsndfile, libandroid-glob, libsoxr, speexdsp"
 TERMUX_PKG_BREAKS="libpulseaudio-dev, libpulseaudio"
 TERMUX_PKG_REPLACES="libpulseaudio-dev, libpulseaudio"
-# glib is only a runtime dependency of pulseaudio-glib subpackage
-TERMUX_PKG_BUILD_DEPENDS="libtool, glib, check"
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="-D alsa=disabled
--D x11=disabled
--D gtk=disabled
--D openssl=disabled
--D gsettings=disabled
--D doxygen=false
--D database=simple"
+TERMUX_PKG_BUILD_DEPENDS="libtool"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-neon-opt
+--disable-alsa
+--disable-esound
+--disable-glib2
+--disable-x11
+--disable-gtk3
+--disable-openssl
+--without-caps
+--with-database=simple
+--disable-memfd
+--disable-gsettings
+--bindir=$TERMUX_PREFIX/libexec
+ax_cv_PTHREAD_PRIO_INHERIT=no"
 TERMUX_PKG_CONFFILES="etc/pulse/client.conf etc/pulse/daemon.conf etc/pulse/default.pa etc/pulse/system.pa"
 
 termux_step_pre_configure() {
 	# Our aaudio sink module needs libaaudio.so from a later android api version:
-	local _ANDROID=""
-	if [ "$TERMUX_ARCH" = "arm" ]; then
-		_ANDROID="eabi"
+	local _NDK_ARCHNAME=$TERMUX_ARCH
+	if [ "$TERMUX_ARCH" = "aarch64" ]; then
+		_NDK_ARCHNAME=arm64
+	elif [ "$TERMUX_ARCH" = "i686" ]; then
+		_NDK_ARCHNAME=x86
 	fi
 	mkdir $TERMUX_PKG_TMPDIR/libaaudio
-	cp $NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$TERMUX_ARCH-linux-android$_ANDROID/26/libaaudio.so \
+	cp $NDK/platforms/android-26/arch-$_NDK_ARCHNAME/usr/lib*/libaaudio.so \
 		$TERMUX_PKG_TMPDIR/libaaudio/
 	LDFLAGS+=" -L$TERMUX_PKG_TMPDIR/libaaudio/"
 
@@ -36,17 +43,14 @@ termux_step_pre_configure() {
 	mkdir $TERMUX_PKG_SRCDIR/src/modules/aaudio
 	cp $TERMUX_PKG_BUILDER_DIR/module-aaudio-sink.c $TERMUX_PKG_SRCDIR/src/modules/aaudio
 
-	export LIBS="-landroid-glob -landroid-execinfo"
-
-	local _libgcc="$($CC -print-libgcc-file-name)"
-	LIBS+=" -L$(dirname $_libgcc) -l:$(basename $_libgcc)"
+	export LIBS="-llog -landroid-glob"
 }
 
 termux_step_post_make_install() {
 	# Some binaries link against these:
 	cd $TERMUX_PREFIX/lib
-	for lib in pulseaudio/{,modules/}lib*.so*; do
-		ln -v -s -f "$lib" "$(basename "$lib")"
+	for lib in pulseaudio/lib*.so* pulse-${TERMUX_PKG_VERSION}/modules/lib*.so*; do
+		ln -s -f $lib $(basename $lib)
 	done
 
 	# Pulseaudio fails to start when it cannot detect any sound hardware
@@ -55,4 +59,18 @@ termux_step_post_make_install() {
 		-e '/^load-module module-detect$/s/^/#/'
 	echo "load-module module-sles-sink" >> $TERMUX_PREFIX/etc/pulse/default.pa
 	echo "#load-module module-aaudio-sink" >> $TERMUX_PREFIX/etc/pulse/default.pa
+
+	if [ "$TERMUX_ARCH_BITS" = 32 ]; then
+		SYSTEM_LIB=lib
+	else
+		SYSTEM_LIB=lib64
+	fi
+
+	cd $TERMUX_PREFIX/libexec
+	for bin in pacat pacmd pactl pasuspender pulseaudio; do
+		rm -f ../bin/$bin
+		echo "#!$TERMUX_PREFIX/bin/sh" >> ../bin/$bin
+		echo "LD_LIBRARY_PATH=/system/$SYSTEM_LIB:/system/vendor/$SYSTEM_LIB:$TERMUX_PREFIX/lib exec $TERMUX_PREFIX/libexec/$bin \"\$@\"" >> ../bin/$bin
+		chmod +x ../bin/$bin
+	done
 }

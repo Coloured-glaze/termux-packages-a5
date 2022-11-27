@@ -1,45 +1,46 @@
 TERMUX_PKG_HOMEPAGE=https://syncthing.net/
 TERMUX_PKG_DESCRIPTION="Decentralized file synchronization"
 TERMUX_PKG_LICENSE="MPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-# NOTE: as of 1.12.0 compilation fails when package zstd is
-# present in TERMUX_PREFIX.
-TERMUX_PKG_VERSION="1.22.1"
+TERMUX_PKG_VERSION=1.3.0
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SHA256=684c4700b6f51d4fc89b422fbc3f26cae703df4649e74e20783c2d0cf845538e
 TERMUX_PKG_SRCURL=https://github.com/syncthing/syncthing/releases/download/v${TERMUX_PKG_VERSION}/syncthing-source-v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=b024d112167e0e81a785ab98c1a044aee1ac041dfe57a62772c08284f875a5bd
-TERMUX_PKG_AUTO_UPDATE=true
 
-termux_step_make() {
+termux_step_make(){
 	termux_setup_golang
 
 	# The build.sh script doesn't with our compiler
 	# so small adjustments to file locations are needed
 	# so the build.go is fine.
-	mkdir -p go/src/github.com/syncthing
-	ln -sf "${TERMUX_PKG_SRCDIR}" go/src/github.com/syncthing/syncthing
+	mkdir -p go/src/github.com/syncthing/syncthing
+	cp $TERMUX_PKG_SRCDIR/vendor/* ./go/src/ -r
+	cp $TERMUX_PKG_SRCDIR/*  go/src/github.com/syncthing/syncthing -r
 
 	# Set gopath so dependencies are built as in go get etc.
-	export GOPATH="$(pwd)/go"
+	export GOPATH=$(pwd)/go
 
 	cd go/src/github.com/syncthing/syncthing
 
-	# Unset GOARCH so building build.go works.
-	export GO_ARCH="${GOARCH}"
-	export _CC="${CC}"
-	export GO_OS="${GOOS}"
+	# Unset GOARCH so building build.go is works.
+	export GO_ARCH=$GOARCH
+	export _CC=$CC
 	unset GOOS GOARCH CC
-
-	rm -rf vendor # syncthing has vendored dependencies, which fails with our compiler.
+	
 	# Now file structure is same as go get etc.
-	go run build.go -goos "${GO_OS}" -goarch "${GO_ARCH}" \
-		-cc "${_CC}" -version "v${TERMUX_PKG_VERSION}" -no-upgrade build
+	go build build.go
+	export CC=$_CC
+	./build -goos android \
+		-goarch $GO_ARCH \
+		-no-upgrade \
+		-version v$TERMUX_PKG_VERSION \
+		build
 }
 
 termux_step_make_install() {
-	cp "${GOPATH}"/src/github.com/syncthing/syncthing/syncthing $TERMUX_PREFIX/bin/
+	cp go/src/github.com/syncthing/syncthing/syncthing $TERMUX_PREFIX/bin/
 
 	for section in 1 5 7; do
-		local MANDIR=$TERMUX_PREFIX/share/man/man$section
+		local MANDIR=$PREFIX/share/man/man$section
 		mkdir -p $MANDIR
 		cp $TERMUX_PKG_SRCDIR/man/*.$section $MANDIR
 	done

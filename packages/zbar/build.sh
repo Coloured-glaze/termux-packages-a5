@@ -1,11 +1,10 @@
-TERMUX_PKG_HOMEPAGE=https://github.com/mchehab/zbar
+TERMUX_PKG_HOMEPAGE=http://zbar.sourceforge.net
 TERMUX_PKG_DESCRIPTION="Software suite for reading bar codes from various sources"
 TERMUX_PKG_LICENSE="LGPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=0.23.90
-TERMUX_PKG_SRCURL=https://github.com/mchehab/zbar/archive/${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=25fdd6726d5c4c6f95c95d37591bfbb2dde63d13d0b10cb1350923ea8b11963b
-TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_VERSION=0.10
+TERMUX_PKG_REVISION=11
+TERMUX_PKG_SRCURL=http://downloads.sourceforge.net/project/zbar/zbar/0.10/zbar-${TERMUX_PKG_VERSION}.tar.bz2
+TERMUX_PKG_SHA256=234efb39dbbe5cef4189cc76f37afbe3cfcfb45ae52493bfe8e191318bdbadc6
 TERMUX_PKG_DEPENDS="libiconv, imagemagick, libjpeg-turbo, zlib"
 TERMUX_PKG_BREAKS="zbar-dev"
 TERMUX_PKG_REPLACES="zbar-dev"
@@ -15,5 +14,5 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-pthread
 --without-python --mandir=$TERMUX_PREFIX/share/man"
 
 termux_step_pre_configure() {
-	autoreconf -vfi
+	autoconf
 }

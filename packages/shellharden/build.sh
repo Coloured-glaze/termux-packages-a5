@@ -1,13 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/anordal/shellharden
 TERMUX_PKG_DESCRIPTION="The corrective bash syntax highlighter"
 TERMUX_PKG_LICENSE="MPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=4.3.0
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=4.1.1
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=https://github.com/anordal/shellharden/archive/v$TERMUX_PKG_VERSION.tar.gz
-TERMUX_PKG_SHA256=d17bf55bae4ed6aed9f0d5cea8efd11026623a47b6d840b826513ab5b48db3eb
+TERMUX_PKG_SHA256=7d7ac3443f35eb74abfc78fa67db2947d60b7d0782f225f55d6eefafcf294c7c
 TERMUX_PKG_BUILD_IN_SRC=true
-TERMUX_PKG_AUTO_UPDATE=true
-TERMUX_PKG_UPDATE_TAG_TYPE="newest-tag"
 
 termux_step_post_make_install() {
 	install -Dm700 \

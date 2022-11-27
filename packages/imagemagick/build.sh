@@ -1,36 +1,43 @@
 TERMUX_PKG_HOMEPAGE=https://www.imagemagick.org/
 TERMUX_PKG_DESCRIPTION="Suite to create, edit, compose, or convert images in a variety of formats"
 TERMUX_PKG_LICENSE="ImageMagick"
-TERMUX_PKG_MAINTAINER="@termux"
-_VERSION=7.1.0-52
-TERMUX_PKG_VERSION=${_VERSION//-/.}
-TERMUX_PKG_SRCURL=https://github.com/ImageMagick/ImageMagick/archive/refs/tags/${_VERSION}.tar.gz
-TERMUX_PKG_SHA256=bacd6d63f16482f269bf5cfe76d34b9a2b01ec737e9cb41fd2612d37f34698fc
-TERMUX_PKG_DEPENDS="fftw, fontconfig, freetype, gdk-pixbuf, glib, harfbuzz, libandroid-support, libbz2, libc++, libcairo, libheif, libjpeg-turbo, libjxl, liblzma, libpng, librsvg, libtiff, libwebp, libx11, libxext, libxml2, littlecms, openexr, openjpeg, pango, zlib"
-TERMUX_PKG_BREAKS="imagemagick-dev, imagemagick-x"
-TERMUX_PKG_REPLACES="imagemagick-dev, imagemagick-x"
+TERMUX_PKG_VERSION=7.0.8.68
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://github.com/ImageMagick/ImageMagick/archive/$(echo $TERMUX_PKG_VERSION | sed 's/\(.*\)\./\1-/').tar.gz
+TERMUX_PKG_SHA256=c3aa886789b36d3fe1f6f99fc1a32bbbf26d4ce51f485b32c3a4b85e176a53c9
+TERMUX_PKG_DEPENDS="fftw, pango, glib, libbz2, libjpeg-turbo, liblzma, libpng, libtiff, libxml2, openjpeg, littlecms, libwebp, librsvg"
+TERMUX_PKG_BREAKS="imagemagick-dev"
+TERMUX_PKG_REPLACES="imagemagick-dev"
+
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
---with-x
+--disable-largefile
+--without-x
 --without-gvc
---with-magick-plus-plus=yes
---with-bzlib=yes
+--with-magick-plus-plus=no
+--with-bzlib=no
 --with-xml=yes
 --with-rsvg=yes
 --with-lzma
---with-jxl=yes
---with-openexr
---with-fftw
 --disable-openmp
 ac_cv_func_ftime=no
+ac_cv_header_complex_h=no
 "
 
 TERMUX_PKG_RM_AFTER_INSTALL="
+bin/Magick-config
+bin/MagickCore-config
+bin/MagickWand-config
+bin/Wand-config
 share/ImageMagick-7/francais.xml
+share/man/man1/Magick-config.1
+share/man/man1/MagickCore-config.1
+share/man/man1/MagickWand-config.1
+share/man/man1/Wand-config.1
 "
 
 termux_step_pre_configure() {
-	export LDFLAGS+=" $($CC -print-libgcc-file-name)"
-
-	# Value of PKG_CONFIG becomes hardcoded in bin/*-config
-	export PKG_CONFIG=pkg-config
+	if [ $TERMUX_ARCH = "i686" ]; then
+		# Avoid "libMagickCore-7.Q16HDRI.so: error: undefined reference to '__atomic_load'":
+		LDFLAGS+=" -latomic"
+	fi
 }

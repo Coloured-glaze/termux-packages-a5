@@ -1,19 +1,20 @@
 TERMUX_PKG_HOMEPAGE=https://web.mit.edu/kerberos
 TERMUX_PKG_DESCRIPTION="The Kerberos network authentication system"
-TERMUX_PKG_LICENSE="custom"
-TERMUX_PKG_LICENSE_FILE="../NOTICE"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.20.1
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_VERSION=1.17
+TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=https://fossies.org/linux/misc/krb5-$TERMUX_PKG_VERSION.tar.gz
-TERMUX_PKG_SHA256=704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851
-TERMUX_PKG_DEPENDS="libandroid-support, libandroid-glob, libresolv-wrapper, readline, openssl, libdb"
+TERMUX_PKG_SHA256=5a6e2284a53de5702d3dc2be3b9339c963f9b5397d3fbbc53beb249380a781f5
+TERMUX_PKG_DEPENDS="libandroid-support, libandroid-glob, readline, openssl, libutil, libdb"
 TERMUX_PKG_BREAKS="krb5-dev"
 TERMUX_PKG_REPLACES="krb5-dev"
+TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
 TERMUX_PKG_CONFFILES="etc/krb5.conf var/krb5kdc/kdc.conf"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-static
 --with-readline
 --without-system-verto
+--with-netlib=-lc
 --enable-dns-for-realm
 --sbindir=$TERMUX_PREFIX/bin
 --with-size-optimizations
@@ -23,7 +24,7 @@ DEFKTNAME=$TERMUX_PREFIX/etc/krb5.keytab
 DEFCKTNAME=$TERMUX_PREFIX/var/krb5/user/%{euid}/client.keytab
 "
 
-termux_step_post_get_source() {
+termux_step_post_extract_package() {
 	TERMUX_PKG_SRCDIR+="/src"
 }
 
@@ -37,7 +38,7 @@ termux_step_pre_configure() {
 	cp "$TERMUX_PKG_BUILDER_DIR/netbsd_getpass.c" "$TERMUX_PKG_SRCDIR/clients/kpasswd/"
 
 	CFLAGS="$CFLAGS -D_PASSWORD_LEN=PASS_MAX"
-	export LIBS="-landroid-glob -lresolv_wrapper"
+	export LIBS="-landroid-glob -llog"
 }
 
 termux_step_post_make_install() {

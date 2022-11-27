@@ -1,8 +1,9 @@
---- a/configure
-+++ b/configure
-@@ -35,18 +35,15 @@
+diff -u -r ../mandoc-1.14.5/configure ./configure
+--- ../mandoc-1.14.5/configure	2019-03-10 09:56:43.000000000 +0000
++++ ./configure	2019-03-17 11:00:40.653234300 +0000
+@@ -35,16 +35,13 @@
  
- SOURCEDIR=`dirname "${0}"`
+ SOURCEDIR=`dirname "$0"`
  
 -MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
 -MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
@@ -12,25 +13,14 @@
  OSNAME=
  UTF8_LOCALE=
  
- AR=ar
--CC=cc
+-CC=`printf "all:\\n\\t@echo \\\$(CC)\\n" | env -i make -sf -`
 -CFLAGS=
- FATAL=0
  LDADD=
 -LDFLAGS=
  LD_NANOSLEEP=
  LD_OHASH=
  LD_RECVMSG=
-@@ -121,7 +118,7 @@
- BINM_MAN="man"
- BINM_SOELIM="soelim"
- BINM_WHATIS="whatis"
--BINM_PAGER=
-+BINM_PAGER="less"
- MANM_MAN="man"
- MANM_MANCONF="man.conf"
- MANM_MDOC="mdoc"
-@@ -134,7 +131,7 @@
+@@ -126,7 +123,7 @@
  INSTALL_LIB=
  INSTALL_MAN=
  INSTALL_DATA=
@@ -39,16 +29,16 @@
  
  # --- manual settings from configure.local -----------------------------
  
-@@ -310,7 +307,7 @@
- runtest isblank		ISBLANK		|| true
- runtest mkdtemp		MKDTEMP		|| true
- runtest mkstemps	MKSTEMPS	|| true
--runtest nanosleep	NANOSLEEP	"${LD_NANOSLEEP}" "-lrt" || true
-+runtest nanosleep	NANOSLEEP	"${LD_NANOSLEEP}" "" || true
- runtest ntohl		NTOHL		|| true
- runtest O_DIRECTORY	O_DIRECTORY	|| true
- runtest PATH_MAX	PATH_MAX	|| true
-@@ -458,7 +455,7 @@
+@@ -367,7 +364,7 @@
+ elif singletest nanosleep NANOSLEEP; then
+ 	:
+ elif runtest nanosleep NANOSLEEP "-lrt"; then
+-	LD_NANOSLEEP="-lrt"
++	LD_NANOSLEEP=""
+ fi
+ if [ "${HAVE_NANOSLEEP}" -eq 0 ]; then
+ 	echo "FATAL: nanosleep: no" 1>&2
+@@ -452,7 +449,7 @@
  [ ${HAVE_GETLINE} -eq 0 ] && echo "#include <stdio.h>"
  
  echo

@@ -1,12 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/junegunn/fzf
 TERMUX_PKG_DESCRIPTION="Command-line fuzzy finder"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.35.1"
+TERMUX_PKG_VERSION=0.18.0
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=5406d181785ea17b007544082b972ae004b62fb19cdb41f25e265ea3cc8c2d9d
 TERMUX_PKG_SRCURL=https://github.com/junegunn/fzf/archive/${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=d59ec6f2b6e95dad53bb81f758471e066c657be1b696f2fe569e1a9265dda8fe
-TERMUX_PKG_DEPENDS="ncurses-utils,tmux"
-TERMUX_PKG_AUTO_UPDATE=true
 
 # Depend on findutils as fzf uses the -fstype option, which busybox
 # find does not support, when invoking find:
@@ -46,19 +44,17 @@ termux_step_make_install() {
 	mkdir -p $TERMUX_PREFIX/share/man/man1/
 	cp $TERMUX_PKG_SRCDIR/man/man1/fzf.1 $TERMUX_PREFIX/share/man/man1/
 
+	# Install the vim plugin:
+	mkdir -p $TERMUX_PREFIX/share/vim/vim81/plugin
+	cp $TERMUX_PKG_SRCDIR/plugin/fzf.vim $TERMUX_PREFIX/share/vim/vim81/plugin/fzf.vim
+
+	# Install bash completion script:
+	mkdir -p $TERMUX_PREFIX/share/bash-completion/completions/
+	cp $TERMUX_PKG_SRCDIR/shell/completion.bash $TERMUX_PREFIX/share/bash-completion/completions/fzf
+
 	# Install the rest of the shell scripts:
 	mkdir -p $TERMUX_PREFIX/share/fzf
 	cp $TERMUX_PKG_SRCDIR/shell/* $TERMUX_PREFIX/share/fzf/
-	
-	# Symlink shell completions.
-	mkdir -p $TERMUX_PREFIX/share/bash-completion/completions/
-	ln -sfr $TERMUX_PREFIX/share/fzf/completion.bash $TERMUX_PREFIX/share/bash-completion/completions/fzf
-	mkdir -p $TERMUX_PREFIX/share/zsh/site-functions
-	ln -sfr $TERMUX_PREFIX/share/fzf/completion.zsh $TERMUX_PREFIX/share/zsh/site-functions/_fzf
-	
-	# Fish keybindings.
-	mkdir -p $TERMUX_PREFIX/share/fish/vendor_functions.d
-	ln -sfr $TERMUX_PREFIX/share/fzf/key-bindings.fish $TERMUX_PREFIX/share/fish/vendor_functions.d/fzf_key_bindings.fish
 
 	# Install the nvim plugin:
 	mkdir -p $TERMUX_PREFIX/share/nvim/runtime/plugin

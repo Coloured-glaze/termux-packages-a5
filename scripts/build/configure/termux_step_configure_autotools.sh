@@ -36,9 +36,7 @@ termux_step_configure_autotools() {
 		# Some packages provides a $PKG-config script which some configure scripts pickup instead of pkg-config:
 		mkdir "$TERMUX_PKG_TMPDIR/config-scripts"
 		for f in $TERMUX_PREFIX/bin/*config; do
-			if [[ -f "$f" && "$(head -c 4 "$f")" != "$(echo -ne '\0177ELF')" ]]; then
-				cp "$f" "$TERMUX_PKG_TMPDIR/config-scripts"
-			fi
+			test -f "$f" && cp "$f" "$TERMUX_PKG_TMPDIR/config-scripts"
 		done
 		export PATH=$TERMUX_PKG_TMPDIR/config-scripts:$PATH
 	fi
@@ -90,7 +88,6 @@ termux_step_configure_autotools() {
 	AVOID_GNULIB+=" gl_cv_func_unlink_honors_slashes=yes"
 	AVOID_GNULIB+=" gl_cv_func_vsnprintf_posix=yes"
 	AVOID_GNULIB+=" gl_cv_func_vsnprintf_zerosize_c99=yes"
-	AVOID_GNULIB+=" gl_cv_func_wcrtomb_works=yes"
 	AVOID_GNULIB+=" gl_cv_func_wcwidth_works=yes"
 	AVOID_GNULIB+=" gl_cv_func_working_getdelim=yes"
 	AVOID_GNULIB+=" gl_cv_func_working_mkstemp=yes"
@@ -105,7 +102,6 @@ termux_step_configure_autotools() {
 		--disable-dependency-tracking \
 		--prefix=$TERMUX_PREFIX \
 		--libdir=$TERMUX_PREFIX/lib \
-		--sbindir=$TERMUX_PREFIX/bin \
 		--disable-rpath --disable-rpath-hack \
 		$HOST_FLAG \
 		$TERMUX_PKG_EXTRA_CONFIGURE_ARGS \
@@ -113,6 +109,5 @@ termux_step_configure_autotools() {
 		$ENABLE_SHARED \
 		$ENABLE_STATIC \
 		$LIBEXEC_FLAG \
-		$QUIET_BUILD \
-		|| (cat config.log && false)
+		$QUIET_BUILD
 }

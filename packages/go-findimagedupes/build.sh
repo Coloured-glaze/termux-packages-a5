@@ -1,33 +1,23 @@
 TERMUX_PKG_HOMEPAGE=https://gitlab.com/opennota/findimagedupes
 TERMUX_PKG_DESCRIPTION="Find visually similar or duplicate images"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-_COMMIT=47ca1d51be2bc1d437261d82157b84fe977ec934
-TERMUX_PKG_VERSION=2022.07.22
-TERMUX_PKG_SRCURL=https://gitlab.com/opennota/findimagedupes.git
-TERMUX_PKG_GIT_BRANCH=master
-TERMUX_PKG_DEPENDS="file, libc++, libheif, libjpeg-turbo, libpng, libtiff"
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=0.20190114
+TERMUX_PKG_REVISION=9
+_COMMIT=237ed2ef4bbb91c79eee0f5ee84a1adad9c014ff
+TERMUX_PKG_SRCURL=https://gitlab.com/opennota/findimagedupes/-/archive/${_COMMIT}/findimagedupes-${_COMMIT}.tar.gz
+TERMUX_PKG_SHA256=7eb4fbab38c8c1965dafd1d0fddbfac58ba6e1a3d52cd1220df488a0a338abb0
+TERMUX_PKG_DEPENDS="file, libjpeg-turbo, libpng, libtiff"
 TERMUX_PKG_CONFLICTS="findimagedupes"
 TERMUX_PKG_REPLACES="findimagedupes"
-
-termux_step_post_get_source() {
-	git fetch --unshallow
-	git checkout $_COMMIT
-
-	local version="$(git log -1 --format=%cs | sed 's/-/./g')"
-	if [ "$version" != "$TERMUX_PKG_VERSION" ]; then
-		echo -n "ERROR: The specified version \"$TERMUX_PKG_VERSION\""
-		echo " is different from what is expected to be: \"$version\""
-		return 1
-	fi
-}
 
 termux_step_make() {
 	termux_setup_golang
 
 	export GOPATH=$TERMUX_PKG_BUILDDIR
-	export CGO_CFLAGS+=" -I$TERMUX_PREFIX/include/libpng16 -D__GLIBC__"
-	export CGO_CXXFLAGS="$CGO_CFLAGS"
+	export CGO_CFLAGS="$CFLAGS $CPPFLAGS -I$TERMUX_PREFIX/include/libpng16 -D__GLIBC__"
+	export CGO_CXXFLAGS="$CXXFLAGS $CPPFLAGS -I$TERMUX_PREFIX/include/libpng16 -D__GLIBC__"
+	export CGO_LDFLAGS="$LDFLAGS"
 
 	mkdir -p "$GOPATH"/src/gitlab.com/opennota
 	ln -sf "$TERMUX_PKG_SRCDIR" "$GOPATH"/src/gitlab.com/opennota/findimagedupes

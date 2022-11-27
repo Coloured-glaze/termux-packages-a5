@@ -1,14 +1,13 @@
 TERMUX_PKG_HOMEPAGE=https://www.gnupg.org/
 TERMUX_PKG_DESCRIPTION="Implementation of the OpenPGP standard for encrypting and signing data and communication"
-TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2.3.8
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_VERSION=2.2.17
+TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=https://www.gnupg.org/ftp/gcrypt/gnupg/gnupg-${TERMUX_PKG_VERSION}.tar.bz2
-TERMUX_PKG_SHA256=540b7a40e57da261fb10ef521a282e0021532a80fd023e75fb71757e8a4969ed
+TERMUX_PKG_SHA256=afa262868e39b651a2db4c071fba90415154243e83a830ca00516f9a807fd514
 TERMUX_PKG_DEPENDS="libassuan, libbz2, libgcrypt, libgnutls, libgpg-error, libksba, libnpth, libsqlite, readline, pinentry, resolv-conf, zlib"
 TERMUX_PKG_CONFLICTS="gnupg2 (<< 2.2.9-1), dirmngr (<< 2.2.17-1)"
 TERMUX_PKG_REPLACES="gnupg2 (<< 2.2.9-1), dirmngr (<< 2.2.17-1)"
-TERMUX_PKG_SUGGESTS="scdaemon"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-ldap
 --enable-sqlite

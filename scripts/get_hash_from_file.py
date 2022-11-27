@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import sys
+import os, sys
 
-def get_pkg_hash_from_Packages(Packages_file, package, version, hash_type="SHA256"):
+def get_pkg_hash_from_Packages(Packages_file, package, version, hash="SHA256"):
     with open(Packages_file, 'r') as Packages:
         package_list = Packages.read().split('\n\n')
     for pkg in package_list:
@@ -16,27 +16,24 @@ def get_pkg_hash_from_Packages(Packages_file, package, version, hash_type="SHA25
                         # Seems the repo contains the wrong version, or several versions
                         # We can't use this one so continue looking
                         break
-                elif line.startswith(hash_type):
+                elif line.startswith(hash):
                     print(line.split(" ")[1])
                     break
 
-def get_Packages_hash_from_Release(Release_file, arch, component, hash_type="SHA256"):
+def get_Packages_hash_from_Release(Release_file, arch, component, hash="SHA256"):
     string_to_find = component+'/binary-'+arch+'/Packages'
     with open(Release_file, 'r') as Release:
         hash_list = Release.readlines()
     for i in range(len(hash_list)):
-        if hash_list[i].startswith(hash_type+':'):
+        if hash_list[i].startswith(hash+':'):
             break
     for j in range(i, len(hash_list)):
-        if string_to_find in hash_list[j].strip(' ') and string_to_find+"." not in hash_list[j].strip(' '):
-            hash_entry = list(filter(lambda s: s != '', hash_list[j].strip('').split(' ')))
-            if hash_entry[2].startswith(".work_"):
-                continue
-            print(hash_entry[0])
+        if string_to_find in hash_list[j].strip(' '):
+            print(hash_list[j].strip(' ').split(' ')[0])
             break
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 2:
         sys.exit('Too few arguments, I need the path to a Packages file, a package name and a version, or an InRelease file, an architecture and a component name. Exiting')
 
     if sys.argv[1].endswith('Packages'):

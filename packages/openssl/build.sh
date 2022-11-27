@@ -1,12 +1,11 @@
 TERMUX_PKG_HOMEPAGE=https://www.openssl.org/
 TERMUX_PKG_DESCRIPTION="Library implementing the SSL and TLS protocols as well as general purpose cryptography functions"
-TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-_VERSION=3.0.7
-TERMUX_PKG_VERSION=1:${_VERSION}
-TERMUX_PKG_SRCURL=https://www.openssl.org/source/openssl-${_VERSION/\~/-}.tar.gz
-TERMUX_PKG_SHA256=83049d042a260e696f62406ac5c08bf706fd84383f945cf21bd61e9ed95c396e
-TERMUX_PKG_DEPENDS="ca-certificates, zlib"
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_DEPENDS="ca-certificates"
+TERMUX_PKG_VERSION=1.1.1d
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
+TERMUX_PKG_SRCURL=https://www.openssl.org/source/openssl-${TERMUX_PKG_VERSION/\~/-}.tar.gz
 TERMUX_PKG_CONFFILES="etc/tls/openssl.cnf"
 TERMUX_PKG_RM_AFTER_INSTALL="bin/c_rehash etc/ssl/misc"
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -22,6 +21,9 @@ termux_step_configure() {
 	fi
 
 	CFLAGS+=" -DNO_SYSLOG"
+	if [ $TERMUX_ARCH = arm ]; then
+		CFLAGS+=" -fno-integrated-as"
+	fi
 
 	perl -p -i -e "s@TERMUX_CFLAGS@$CFLAGS@g" Configure
 	rm -Rf $TERMUX_PREFIX/lib/libcrypto.* $TERMUX_PREFIX/lib/libssl.*
@@ -29,12 +31,14 @@ termux_step_configure() {
 	test $TERMUX_ARCH = "aarch64" && TERMUX_OPENSSL_PLATFORM="android-arm64"
 	test $TERMUX_ARCH = "i686" && TERMUX_OPENSSL_PLATFORM="android-x86"
 	test $TERMUX_ARCH = "x86_64" && TERMUX_OPENSSL_PLATFORM="android-x86_64"
+	# If enabling zlib-dynamic we need "zlib-dynamic" instead of "no-comp no-dso":
 	./Configure $TERMUX_OPENSSL_PLATFORM \
 		--prefix=$TERMUX_PREFIX \
 		--openssldir=$TERMUX_PREFIX/etc/tls \
 		shared \
-		zlib-dynamic \
 		no-ssl \
+		no-comp \
+		no-dso \
 		no-hw \
 		no-srp \
 		no-tests

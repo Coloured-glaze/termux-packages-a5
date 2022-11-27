@@ -1,9 +1,9 @@
 TERMUX_PKG_HOMEPAGE=http://libpipeline.nongnu.org/
 TERMUX_PKG_DESCRIPTION="C library for manipulating pipelines of subprocesses in a flexible and convenient way"
-TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.5.7
-TERMUX_PKG_SRCURL=https://download.savannah.nongnu.org/releases/libpipeline/libpipeline-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=b8b45194989022a79ec1317f64a2a75b1551b2a55bea06f67704cb2a2e4690b0
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_VERSION=1.5.1
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=d633706b7d845f08b42bc66ddbe845d57e726bf89298e2cee29f09577e2f902f
 TERMUX_PKG_BREAKS="libpipeline-dev"
 TERMUX_PKG_REPLACES="libpipeline-dev"
+TERMUX_PKG_SRCURL=http://download.savannah.gnu.org/releases/libpipeline/libpipeline-${TERMUX_PKG_VERSION}.tar.gz

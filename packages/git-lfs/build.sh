@@ -1,11 +1,11 @@
 TERMUX_PKG_HOMEPAGE=https://git-lfs.github.com/
 TERMUX_PKG_DESCRIPTION="Git extension for versioning large files"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="3.2.0"
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=2.9.1
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=https://github.com/git-lfs/git-lfs/archive/v$TERMUX_PKG_VERSION.tar.gz
-TERMUX_PKG_SHA256=f8e6bbe043b97db8a5c16da7289e149a3fed9f4d4f11cffcc6e517c7870cd9e5
-TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_SHA256=f5a444f00e30b663ae32b34ebee82356ec2af62a8d6eafceaa4f18bfa9b6e600
 
 termux_step_make() {
 	termux_setup_golang
@@ -26,7 +26,7 @@ termux_step_make_install() {
 }
 
 termux_step_post_make_install() {
-	# Remove read-only files generated in build process.
+	## Remove read-only files generated in build process.
 	chmod -R 700 "$TERMUX_PKG_BUILDDIR"/pkg
 	rm -rf "$TERMUX_PKG_BUILDDIR"/pkg
 }

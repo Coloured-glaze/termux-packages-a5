@@ -1,13 +1,14 @@
 TERMUX_PKG_HOMEPAGE=https://www.nginx.org
 TERMUX_PKG_DESCRIPTION="Lightweight HTTP server"
 TERMUX_PKG_LICENSE="BSD 2-Clause"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.23.2
-TERMUX_PKG_SRCURL=https://nginx.org/download/nginx-$TERMUX_PKG_VERSION.tar.gz
-TERMUX_PKG_SHA256=a80cc272d3d72aaee70aa8b517b4862a635c0256790434dbfc4d618a999b0b46
-TERMUX_PKG_DEPENDS="libandroid-glob, libcrypt, pcre2, openssl, zlib"
+TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
+TERMUX_PKG_VERSION=1.17.4
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=http://nginx.org/download/nginx-$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=62854b365e66670ef4f1f8cc79124f914551444da974207cd5fe22d85710e555
+TERMUX_PKG_DEPENDS="libandroid-glob, libcrypt, pcre, openssl, zlib"
 TERMUX_PKG_BUILD_IN_SRC=true
-TERMUX_PKG_SERVICE_SCRIPT=("nginx" "mkdir -p $TERMUX_ANDROID_HOME/.nginx\nif [ -f \"$TERMUX_ANDROID_HOME/.nginx/nginx.conf\" ]; then CONFIG=\"$TERMUX_ANDROID_HOME/.nginx/nginx.conf\"; else CONFIG=\"$TERMUX_PREFIX/etc/nginx/nginx.conf\"; fi\nexec nginx -p ~/.nginx -g \"daemon off;\" -c \$CONFIG 2>&1")
+
 TERMUX_PKG_CONFFILES="
 etc/nginx/fastcgi.conf
 etc/nginx/fastcgi_params
@@ -19,6 +20,7 @@ etc/nginx/scgi_params
 etc/nginx/uwsgi_params
 etc/nginx/win-utf"
 
+
 termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
 	# build.sh script deletes specific files in $TERMUX_PREFIX.
@@ -29,13 +31,13 @@ termux_step_pre_configure() {
 	CPPFLAGS="$CPPFLAGS -DIOV_MAX=1024"
 	LDFLAGS="$LDFLAGS -landroid-glob"
 
-	# remove config from previous installs
+	# remove config from previouse installs
 	rm -rf "$TERMUX_PREFIX/etc/nginx"
 }
 
 termux_step_configure() {
 	DEBUG_FLAG=""
-	$TERMUX_DEBUG_BUILD && DEBUG_FLAG="--with-debug"
+	$TERMUX_DEBUG && DEBUG_FLAG="--with-debug"
 
 	./configure \
 		--prefix=$TERMUX_PREFIX \
@@ -45,7 +47,10 @@ termux_step_configure() {
 		--with-cpp=$CPP \
 		--with-cc-opt="$CPPFLAGS $CFLAGS" \
 		--with-ld-opt="$LDFLAGS" \
+		--with-pcre \
+		--with-pcre-jit \
 		--with-threads \
+		--with-ipv6 \
 		--sbin-path="$TERMUX_PREFIX/bin/nginx" \
 		--conf-path="$TERMUX_PREFIX/etc/nginx/nginx.conf" \
 		--http-log-path="$TERMUX_PREFIX/var/log/nginx/access.log" \
@@ -61,9 +66,6 @@ termux_step_configure() {
 		--with-http_ssl_module \
 		--with-http_v2_module \
 		--with-http_gunzip_module \
-		--with-http_sub_module \
-		--with-stream \
-		--with-stream_ssl_module \
 		$DEBUG_FLAG
 }
 
@@ -102,3 +104,4 @@ termux_step_post_massage() {
 		mkdir -p "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX/var/lib/nginx/$dir"
 	done
 }
+

@@ -1,13 +1,11 @@
-TERMUX_PKG_HOMEPAGE=https://timewarrior.net/
+TERMUX_PKG_HOMEPAGE=https://taskwarrior.org/docs/timewarrior/
 TERMUX_PKG_DESCRIPTION="Command-line time tracker"
 TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.4.3
-TERMUX_PKG_SRCURL=https://github.com/GothenburgBitFactory/timewarrior.git
+TERMUX_PKG_VERSION=1.1.1
+TERMUX_PKG_REVISION=6
+TERMUX_PKG_SRCURL=https://taskwarrior.org/download/timew-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=1f7d9a62e55fc5a3126433654ccb1fd7d2d135f06f05697f871897c9db77ccc9
 TERMUX_PKG_DEPENDS="libandroid-glob, libc++"
-
-# Installation of man pages is broken as of version 1.4.3.
-TERMUX_PKG_RM_AFTER_INSTALL="share/man"
 
 termux_step_pre_configure() {
 	LDFLAGS+=" -landroid-glob"

@@ -1,10 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://httpd.apache.org
 TERMUX_PKG_DESCRIPTION="Apache Web Server"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1:2.4.54
-TERMUX_PKG_SRCURL=https://www.apache.org/dist/httpd/httpd-${TERMUX_PKG_VERSION:2}.tar.bz2
-TERMUX_PKG_SHA256=eb397feeefccaf254f8d45de3768d9d68e8e73851c49afd5b7176d1ecf80c340
+TERMUX_PKG_VERSION=2.4.41
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SHA256=133d48298fe5315ae9366a0ec66282fa4040efa5d566174481077ade7d18ea40
+TERMUX_PKG_SRCURL=https://www.apache.org/dist/httpd/httpd-$TERMUX_PKG_VERSION.tar.bz2
 TERMUX_PKG_DEPENDS="apr, apr-util, pcre, openssl, libcrypt, libandroid-support, libnghttp2, libexpat, libuuid, zlib"
 TERMUX_PKG_BREAKS="apache2-dev"
 TERMUX_PKG_REPLACES="apache2-dev"
@@ -25,9 +25,7 @@ etc/apache2/extra/proxy-html.conf
 etc/apache2/mime.types
 etc/apache2/magic
 "
-
-TERMUX_PKG_AUTO_UPDATE=true
-
+TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
 # providing manual paths to libs because it picks up host libs on some systems
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --with-apr=$TERMUX_PREFIX
@@ -69,18 +67,10 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --libexecdir=$TERMUX_PREFIX/libexec/apache2
 ac_cv_func_getpwnam=yes
 ac_cv_have_threadsafe_pollset=no
-ac_cv_prog_PCRE_CONFIG=pcre-config
 "
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_RM_AFTER_INSTALL="share/apache2/manual etc/apache2/original share/man/man8/suexec.8 libexec/httpd.exp"
 TERMUX_PKG_EXTRA_MAKE_ARGS="-s"
-TERMUX_PKG_SERVICE_SCRIPT=("httpd" 'exec httpd -DNO_DETACH 2>&1')
-TERMUX_PKG_HOSTBUILD=true
-
-termux_step_host_build() {
-	gcc -O2 -DCROSS_COMPILE $TERMUX_PKG_SRCDIR/server/gen_test_char.c \
-		-o gen_test_char
-}
 
 termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
@@ -99,23 +89,15 @@ termux_step_pre_configure() {
 		export ap_cv_void_ptr_lt_long=8
 	fi
 
-	LDFLAGS="$LDFLAGS -lapr-1 -laprutil-1"
+	LDFLAGS="$LDFLAGS -llog -lapr-1 -laprutil-1"
 
 	# use custom layout
 	cat $TERMUX_PKG_BUILDER_DIR/Termux.layout > $TERMUX_PKG_SRCDIR/config.layout
-
-	make -C $TERMUX_PKG_SRCDIR/libdummy
-	ldflags_tmp="-L$TERMUX_PKG_SRCDIR/libdummy -Wl,--as-needed"
-	for m in cache dav proxy session watchdog; do
-		ldflags_tmp+=,-ldummy-mod_$m
-	done
-	libexecdir=$TERMUX_PREFIX/libexec/apache2
-	LDFLAGS+=" $ldflags_tmp -Wl,-rpath=$libexecdir"
 }
 
 termux_step_post_configure() {
-	install -m700 $TERMUX_PKG_HOSTBUILD_DIR/gen_test_char \
-		$TERMUX_PKG_BUILDDIR/server/gen_test_char
+	# thanks to @JetBalsa
+	gcc -O2 -DCROSS_COMPILE $TERMUX_PKG_SRCDIR/server/gen_test_char.c -o $TERMUX_PKG_BUILDDIR/server/gen_test_char
 	touch -d "1 hour" $TERMUX_PKG_BUILDDIR/server/gen_test_char
 }
 
@@ -134,15 +116,12 @@ termux_step_post_make_install() {
 		-e 's|User daemon|#User daemon|' \
 		-e 's|Group daemon|#Group daemon|' \
 		-i "$TERMUX_PREFIX/etc/apache2/httpd.conf"
-	echo -e "#\n#  Load config files from the config directory 'conf.d'.\n#\nInclude etc/apache2/conf.d/*.conf" >> $TERMUX_PREFIX/etc/apache2/httpd.conf
 }
 
 termux_step_post_massage() {
 	# sometimes it creates a $TERMUX_PREFIX/bin/sh -> /bin/sh
-	rm -f ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/bin/sh
+	rm ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/bin/sh || true
 
-	mkdir -p ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/etc/apache2/conf.d
-	touch ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/etc/apache2/conf.d/placeholder.conf
 	mkdir -p ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/var/run/apache2
 	mkdir -p ${TERMUX_PKG_MASSAGEDIR}${TERMUX_PREFIX}/var/log/apache2
 }

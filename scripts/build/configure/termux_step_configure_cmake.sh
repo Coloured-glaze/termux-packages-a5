@@ -1,13 +1,21 @@
 termux_step_configure_cmake() {
+	termux_setup_cmake
+
+	local BUILD_TYPE=MinSizeRel
+	[ "$TERMUX_DEBUG" = "true" ] && BUILD_TYPE=Debug
+
+	local CMAKE_PROC=$TERMUX_ARCH
+	test $CMAKE_PROC == "arm" && CMAKE_PROC='armv7-a'
+	local MAKE_PROGRAM_PATH
 	if [ "$TERMUX_CMAKE_BUILD" = Ninja ]; then
+		termux_setup_ninja
 		MAKE_PROGRAM_PATH=$(command -v ninja)
 	else
 		MAKE_PROGRAM_PATH=$(command -v make)
 	fi
-	BUILD_TYPE=Release
-	test "$TERMUX_DEBUG_BUILD" == "true" && BUILD_TYPE=Debug
-	CMAKE_PROC=$TERMUX_ARCH
-	test $CMAKE_PROC == "arm" && CMAKE_PROC='armv7-a'
+
+	CXXFLAGS+=" -fno-addrsig"
+	CFLAGS+=" -fno-addrsig"
 
 	local CMAKE_ADDITIONAL_ARGS=()
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
@@ -31,7 +39,6 @@ termux_step_configure_cmake() {
 		-DCMAKE_AR="$(command -v $AR)" \
 		-DCMAKE_UNAME="$(command -v uname)" \
 		-DCMAKE_RANLIB="$(command -v $RANLIB)" \
-		-DCMAKE_STRIP="$(command -v $STRIP)" \
 		-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 		-DCMAKE_C_FLAGS="$CFLAGS $CPPFLAGS" \
 		-DCMAKE_CXX_FLAGS="$CXXFLAGS $CPPFLAGS" \
@@ -40,7 +47,6 @@ termux_step_configure_cmake() {
 		-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
 		-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
 		-DCMAKE_INSTALL_PREFIX=$TERMUX_PREFIX \
-		-DCMAKE_INSTALL_LIBDIR=$TERMUX_PREFIX/lib \
 		-DCMAKE_MAKE_PROGRAM=$MAKE_PROGRAM_PATH \
 		-DCMAKE_SKIP_INSTALL_RPATH=ON \
 		-DCMAKE_USE_SYSTEM_LIBRARIES=True \

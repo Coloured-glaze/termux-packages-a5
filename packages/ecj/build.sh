@@ -1,40 +1,37 @@
 TERMUX_PKG_HOMEPAGE=http://www.eclipse.org/jdt/core/
 TERMUX_PKG_DESCRIPTION="Eclipse Compiler for Java"
 TERMUX_PKG_LICENSE="EPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-# Version 4.12 is the last known to work on Android 7-8.
-_VERSION=4.12
-_DATE=201906051800
-TERMUX_PKG_VERSION=1:${_VERSION}
-TERMUX_PKG_REVISION=4
-TERMUX_PKG_SRCURL=https://archive.eclipse.org/eclipse/downloads/drops${_VERSION:0:1}/R-${_VERSION}-${_DATE}/ecj-${_VERSION}.jar
-TERMUX_PKG_SHA256=69dad18a1fcacd342a7d44c5abf74f50e7529975553a24c64bce0b29b86af497
+_PKG_VERSION=4.6.2
+TERMUX_PKG_VERSION=1:$_PKG_VERSION
+TERMUX_PKG_REVISION=1
+local _date=201611241400
+TERMUX_PKG_SHA256=9953dc2be829732e1b939106a71de018f660891220dbca559a5c7bff84883e51
+TERMUX_PKG_SRCURL=http://archive.eclipse.org/eclipse/downloads/drops${_PKG_VERSION:0:1}/R-$_PKG_VERSION-$_date/ecj-$_PKG_VERSION.jar
 TERMUX_PKG_PLATFORM_INDEPENDENT=true
-TERMUX_PKG_CONFLICTS="ecj4.6"
+TERMUX_PKG_BREAKS="ecj4.6"
+TERMUX_PKG_REPLACES="ecj4.6"
 
-RAW_JAR=$TERMUX_PKG_CACHEDIR/ecj-${_VERSION}.jar
-
-termux_step_pre_configure() {
+termux_step_extract_package() {
 	# Certain packages are not safe to build on device because their
 	# build.sh script deletes specific files in $TERMUX_PREFIX.
 	if $TERMUX_ON_DEVICE_BUILD; then
 		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
 	fi
-}
 
-termux_step_get_source() {
-	mkdir -p $TERMUX_PKG_SRCDIR
-	termux_download $TERMUX_PKG_SRCURL \
-		$RAW_JAR \
-		$TERMUX_PKG_SHA256
+	mkdir $TERMUX_PKG_SRCDIR
 }
 
 termux_step_make() {
+	local RAW_JAR=$TERMUX_PKG_CACHEDIR/ecj-${_PKG_VERSION}.jar
+	termux_download $TERMUX_PKG_SRCURL \
+		$RAW_JAR \
+		$TERMUX_PKG_SHA256
+
 	mkdir -p $TERMUX_PREFIX/share/{dex,java}
 	$TERMUX_D8 \
 		--classpath $ANDROID_HOME/platforms/android-$TERMUX_PKG_API_LEVEL/android.jar \
 		--release \
-		--min-api $TERMUX_PKG_API_LEVEL \
+		--min-api 21 \
 		--output $TERMUX_PKG_TMPDIR \
 		$RAW_JAR
 
@@ -72,23 +69,15 @@ termux_step_make() {
 	# Bundle in an android.jar from an older API also, for those who want to
 	# build apps that run on older Android versions.
 	rm -Rf ./*
-	cp $ANDROID_HOME/platforms/android-$TERMUX_PKG_API_LEVEL/android.jar android.jar
+	cp $ANDROID_HOME/platforms/android-21/android.jar android.jar
 	unzip -q android.jar
 	rm -Rf android.jar resources.arsc res assets
-	jar cfM android-$TERMUX_PKG_API_LEVEL.jar .
-	cp $TERMUX_PKG_TMPDIR/android-jar/android-$TERMUX_PKG_API_LEVEL.jar $TERMUX_PREFIX/share/java/
+	jar cfM android-21.jar .
+	cp $TERMUX_PKG_TMPDIR/android-jar/android-21.jar $TERMUX_PREFIX/share/java/
 
 	rm -Rf $TERMUX_PREFIX/bin/javac
 	install $TERMUX_PKG_BUILDER_DIR/ecj $TERMUX_PREFIX/bin/ecj
 	perl -p -i -e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" $TERMUX_PREFIX/bin/ecj
-	install $TERMUX_PKG_BUILDER_DIR/ecj-$TERMUX_PKG_API_LEVEL $TERMUX_PREFIX/bin/ecj-$TERMUX_PKG_API_LEVEL
-	perl -p -i -e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" $TERMUX_PREFIX/bin/ecj-$TERMUX_PKG_API_LEVEL
-}
-
-termux_step_create_debscripts() {
-	cat <<- EOF > ./postinst
-	#!${TERMUX_PREFIX}/bin/bash
-	rm -f $TERMUX_PREFIX/share/dex/oat/*/ecj.{art,oat,odex,vdex} >/dev/null 2>&1
-	exit 0
-	EOF
+	install $TERMUX_PKG_BUILDER_DIR/ecj-21 $TERMUX_PREFIX/bin/ecj-21
+	perl -p -i -e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" $TERMUX_PREFIX/bin/ecj-21
 }

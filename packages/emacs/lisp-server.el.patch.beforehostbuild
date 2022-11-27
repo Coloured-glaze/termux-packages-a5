@@ -1,11 +1,12 @@
---- ./lisp/server.el.orig	2022-04-06 12:26:52.889010658 +0200
-+++ ./lisp/server.el	2022-04-06 12:28:46.006501888 +0200
-@@ -282,7 +282,7 @@
- 	   (if runtime-dir
- 	       (expand-file-name "emacs" runtime-dir)
- 	     (expand-file-name (format "emacs%d" (user-uid))
--                               (or (getenv "TMPDIR") "/tmp"))))))
-+                               "@TERMUX_PREFIX@/var/run")))))
+diff -u -r ../emacs-25.0.92/lisp/server.el ./lisp/server.el
+--- ../emacs-25.0.92/lisp/server.el	2016-03-02 05:21:42.000000000 -0500
++++ ./lisp/server.el	2016-04-06 17:34:48.134354070 -0400
+@@ -267,7 +267,7 @@
+ ;; does not read the init file.
+ (defvar server-socket-dir
+   (and (featurep 'make-network-process '(:family local))
+-       (format "%s/emacs%d" (or (getenv "TMPDIR") "/tmp") (user-uid)))
++       (format "%s/emacs%d" (or (getenv "TMPDIR") "@TERMUX_PREFIX@/var/run") (user-uid)))
    "The directory in which to place the server socket.
  If local sockets are not supported, this is nil.")
  

@@ -1,26 +1,18 @@
 TERMUX_PKG_HOMEPAGE=https://www.perl.org/
 TERMUX_PKG_DESCRIPTION="Capable, feature-rich programming language"
 TERMUX_PKG_LICENSE="Artistic-License-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-# Packages which should be rebuilt after version change:
-# - exiftool
-# - irssi
-# - libapt-pkg-perl
-# - libregexp-assemble-perl
-# - psutils
-# - subversion
-TERMUX_PKG_VERSION=(5.36.0
-                    1.4)
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SHA256=(e26085af8ac396f62add8a533c3a0ea8c8497d836f0689347ac5abd7b7a4e00a
-                   be9d9f9f7148edff7a2f9695ba3cb7e3975eff6b25a9a81dd311725fd757aa91)
+TERMUX_PKG_VERSION=(5.30.0
+                    1.3)
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=(851213c754d98ccff042caa40ba7a796b2cee88c5325f121be5cbb61bbf975f2
+                   49edea1ea2cd6c5c47386ca71beda8d150c748835781354dbe7f75b1df27e703)
 TERMUX_PKG_SRCURL=(http://www.cpan.org/src/5.0/perl-${TERMUX_PKG_VERSION}.tar.gz
 		   https://github.com/arsv/perl-cross/releases/download/${TERMUX_PKG_VERSION[1]}/perl-cross-${TERMUX_PKG_VERSION[1]}.tar.gz)
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_MAKE_PROCESSES=1
 TERMUX_PKG_RM_AFTER_INSTALL="bin/perl${TERMUX_PKG_VERSION}"
 
-termux_step_post_get_source() {
+termux_step_post_extract_package() {
 	# Certain packages are not safe to build on device because their
 	# build.sh script deletes specific files in $TERMUX_PREFIX.
 	if $TERMUX_ON_DEVICE_BUILD; then
@@ -39,33 +31,33 @@ termux_step_post_get_source() {
 termux_step_configure() {
 	export PATH=$PATH:$TERMUX_STANDALONE_TOOLCHAIN/bin
 
-	(
-		ORIG_AR=$AR; unset AR
-		ORIG_AS=$AS; unset AS
-		ORIG_CC=$CC; unset CC
-		ORIG_CXX=$CXX; unset CXX
-		ORIG_CFLAGS=$CFLAGS; unset CFLAGS
-		ORIG_CPPFLAGS=$CPPFLAGS; unset CPPFLAGS
-		ORIG_CXXFLAGS=$CXXFLAGS; unset CXXFLAGS
-		ORIG_LDFLAGS=$LDFLAGS; unset LDFLAGS
-		ORIG_RANLIB=$RANLIB; unset RANLIB
-		ORIG_LD=$LD; unset LD
+	ORIG_AR=$AR; unset AR
+	ORIG_AS=$AS; unset AS
+	ORIG_CC=$CC; unset CC
+	ORIG_CXX=$CXX; unset CXX
+	ORIG_CPP=$CPP; unset CPP
+	ORIG_CFLAGS=$CFLAGS; unset CFLAGS
+	ORIG_CPPFLAGS=$CPPFLAGS; unset CPPFLAGS
+	ORIG_CXXFLAGS=$CXXFLAGS; unset CXXFLAGS
+	ORIG_LDFLAGS=$LDFLAGS; unset LDFLAGS
+	ORIG_RANLIB=$RANLIB; unset RANLIB
+	ORIG_LD=$LD; unset LD
 
-		cd $TERMUX_PKG_BUILDDIR
-		$TERMUX_PKG_SRCDIR/configure \
-			--target=$TERMUX_HOST_PLATFORM \
-			--with-cc="$ORIG_CC" \
-			--with-ranlib="$ORIG_RANLIB" \
-			-Dosname=android \
-			-Dsysroot=$TERMUX_STANDALONE_TOOLCHAIN/sysroot \
-			-Dprefix=$TERMUX_PREFIX \
-			-Dsh=$TERMUX_PREFIX/bin/sh \
-			-Dld="$ORIG_CC -Wl,-rpath=$TERMUX_PREFIX/lib -Wl,--enable-new-dtags" \
-			-Dar="$ORIG_AR" \
-			-Duseshrplib \
-			-Duseithreads \
-			-Dusemultiplicity
-	)
+	# Since we specify $TERMUX_PREFIX/bin/sh below for the shell
+	# it will be run during the build, so temporarily (removed in
+	# termux_step_post_make_install below) setup symlink:
+	rm -f $TERMUX_PREFIX/bin/sh
+	ln -s /bin/sh $TERMUX_PREFIX/bin/sh
+
+	cd $TERMUX_PKG_BUILDDIR
+	$TERMUX_PKG_SRCDIR/configure \
+		--target=$TERMUX_HOST_PLATFORM \
+		-Dosname=android \
+		-Dsysroot=$TERMUX_STANDALONE_TOOLCHAIN/sysroot \
+		-Dprefix=$TERMUX_PREFIX \
+		-Dsh=$TERMUX_PREFIX/bin/sh \
+		-Dcc="$ORIG_CC" \
+		-Duseshrplib
 }
 
 termux_step_post_make_install() {
@@ -73,6 +65,9 @@ termux_step_post_make_install() {
 	cd $TERMUX_PREFIX/share/man/man1
 	rm perlbug.1
 	ln -s perlthanks.1 perlbug.1
+
+	# Cleanup:
+	rm $TERMUX_PREFIX/bin/sh
 
 	cd $TERMUX_PREFIX/lib
 	ln -f -s perl5/${TERMUX_PKG_VERSION}/${TERMUX_ARCH}-android/CORE/libperl.so libperl.so

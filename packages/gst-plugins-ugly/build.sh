@@ -1,11 +1,15 @@
 TERMUX_PKG_HOMEPAGE=https://gstreamer.freedesktop.org/
 TERMUX_PKG_DESCRIPTION="GStreamer Ugly Plug-ins"
-TERMUX_PKG_LICENSE="LGPL-2.1"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.20.4
+TERMUX_PKG_LICENSE="LGPL-2.0"
+TERMUX_PKG_VERSION=1.16.1
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-${TERMUX_PKG_VERSION}.tar.xz
-TERMUX_PKG_SHA256=5c9ec6bab96517e438b3f9bae0ceb84d3436f3da9bbe180cf4d28e32a7251b59
-TERMUX_PKG_DEPENDS="glib, gst-plugins-base"
+TERMUX_PKG_SHA256=4bf913b2ca5195ac3b53b5e3ade2dc7c45d2258507552ddc850c5fa425968a1d
+TERMUX_PKG_DEPENDS="gst-plugins-base, libx264"
+TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
--Dtests=disabled
+--disable-tests
+--disable-examples
+--disable-android_media
 "
+TERMUX_PKG_RM_AFTER_INSTALL="share/gtk-doc/"

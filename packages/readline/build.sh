@@ -1,24 +1,22 @@
 TERMUX_PKG_HOMEPAGE="https://tiswww.case.edu/php/chet/readline/rltop.html"
 TERMUX_PKG_DESCRIPTION="Library that allow users to edit command lines as they are typed in"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_DEPENDS="libandroid-support, ncurses"
 TERMUX_PKG_BREAKS="bash (<< 5.0), readline-dev"
 TERMUX_PKG_REPLACES="readline-dev"
-_MAIN_VERSION=8.2
+_MAIN_VERSION=8.0
 _PATCH_VERSION=1
 TERMUX_PKG_VERSION=$_MAIN_VERSION.$_PATCH_VERSION
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SHA256=e339f51971478d369f8a053a330a190781acb9864cf4c541060f12078948e461
 TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/readline/readline-${_MAIN_VERSION}.tar.gz
-TERMUX_PKG_SHA256=3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--with-curses --enable-multibyte bash_cv_wcwidth_broken=no"
 TERMUX_PKG_EXTRA_MAKE_ARGS="SHLIB_LIBS=-lncursesw"
 TERMUX_PKG_CONFFILES="etc/inputrc"
 
 termux_step_pre_configure() {
 	declare -A PATCH_CHECKSUMS
-
-	PATCH_CHECKSUMS[001]=bbf97f1ec40a929edab5aa81998c1e2ef435436c597754916e6a5868f273aff7
-
+	PATCH_CHECKSUMS[001]=d8e5e98933cf5756f862243c0601cb69d3667bb33f2c7b751fe4e40b2c3fd069
 	for PATCH_NUM in $(seq -f '%03g' ${_PATCH_VERSION}); do
 		PATCHFILE=$TERMUX_PKG_CACHEDIR/readline_patch_${PATCH_NUM}.patch
 		termux_download \

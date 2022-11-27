@@ -1,31 +1,27 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/tesseract-ocr/tesseract
 TERMUX_PKG_DESCRIPTION="Tesseract is probably the most accurate open source OCR engine available"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=5.2.0
-TERMUX_PKG_REVISION=3
+TERMUX_PKG_VERSION=4.1.0
+TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=https://github.com/tesseract-ocr/tesseract/archive/${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=eba4deb2f92a3f89a6623812074af8c53b772079525b3c263aa70bbf7b748b3c
-TERMUX_PKG_AUTO_UPDATE=true
-TERMUX_PKG_DEPENDS="leptonica, libandroid-glob, libandroid-posix-semaphore, libcpufeatures, libc++, libicu, libtool, libuuid, openmpi, pango, zstd"
+TERMUX_PKG_SHA256=5c5ed5f1a76888dc57a83704f24ae02f8319849f5c4cf19d254296978a1a1961
+TERMUX_PKG_DEPENDS="libc++, libtool, libuuid, leptonica, libandroid-glob"
 TERMUX_PKG_BREAKS="tesseract-dev"
 TERMUX_PKG_REPLACES="tesseract-dev"
-TERMUX_PKG_FORCE_CMAKE=true
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
--DBUILD_SHARED_LIBS=ON
--DUSE_SYSTEM_ICU=on
--DTESSDATA_PREFIX=$TERMUX_PREFIX/share
--DOPENMP_BUILD=ON
-"
 
 termux_step_pre_configure() {
-	LDFLAGS+=" -landroid-posix-semaphore"
+	export LIBS="-landroid-glob"
+
+	# http://blog.matt-swain.com/post/26419042500/installing-tesseract-ocr-on-mac-os-x-lion
+	export LIBLEPT_HEADERSDIR=${TERMUX_PREFIX}/include/leptonica
+
+	perl -p -i -e 's|ADD_RT], true|ADD_RT], false|g' configure.ac
+	./autogen.sh
 }
 
 termux_step_post_make_install() {
 	# download english trained data
-	mkdir -p "${TERMUX_PREFIX}"/share/tessdata
-	cd "${TERMUX_PREFIX}"/share/tessdata
+	cd "${TERMUX_PREFIX}/share/tessdata"
 	rm -f eng.*
 
 	local checksums

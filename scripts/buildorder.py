@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 "Script to generate a build order respecting package dependencies."
 
-import json, os, re, sys
+import os
+import re
+import sys
 
 from itertools import filterfalse
 
@@ -133,17 +135,11 @@ class TermuxSubPackage:
             result += [dependency_package]
         return unique_everseen(result)
 
-def read_packages_from_directories(directories, fast_build_mode, full_buildmode):
+def read_packages_from_directories(directories, fast_build_mode):
     """Construct a map from package name to TermuxPackage.
     Subpackages are mapped to the parent package if fast_build_mode is false."""
     pkgs_map = {}
     all_packages = []
-
-    if full_buildmode:
-        # Ignore directories and get all folders from repo.json file
-        with open ('repo.json') as f:
-            data = json.load(f)
-        directories = [d for d in data.keys()]
 
     for package_dir in directories:
         for pkgdir_name in sorted(os.listdir(package_dir)):
@@ -250,11 +246,13 @@ def main():
     parser.add_argument('package', nargs='?',
                         help='Package to generate dependency list for.')
     parser.add_argument('package_dirs', nargs='*',
-                        help='Directories with packages. Can for example point to "../community-packages/packages". Note that the packages suffix is no longer added automatically if not present.')
+                        help='Directories with packages. Can for example point to "../x11-packages/packages/". "packages/" is appended automatically.')
     args = parser.parse_args()
     fast_build_mode = args.i
     package = args.package
     packages_directories = args.package_dirs
+    if 'packages' not in packages_directories:
+        packages_directories.append('packages')
 
     if not package:
         full_buildorder = True
@@ -265,6 +263,7 @@ def main():
         die('-i mode does not work when building all packages')
 
     if not full_buildorder:
+        packages_real_path = os.path.realpath('packages')
         for path in packages_directories:
             if not os.path.isdir(path):
                 die('Not a directory: ' + path)
@@ -276,7 +275,7 @@ def main():
             die('Not a directory: ' + package)
         if not os.path.relpath(os.path.dirname(package), '.') in packages_directories:
             packages_directories.insert(0, os.path.dirname(package))
-    pkgs_map = read_packages_from_directories(packages_directories, fast_build_mode, full_buildorder)
+    pkgs_map = read_packages_from_directories(packages_directories, fast_build_mode)
 
     if full_buildorder:
         build_order = generate_full_buildorder(pkgs_map)

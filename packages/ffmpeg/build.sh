@@ -1,19 +1,20 @@
 TERMUX_PKG_HOMEPAGE=https://ffmpeg.org
 TERMUX_PKG_DESCRIPTION="Tools and libraries to manipulate a wide range of multimedia formats and protocols"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=5.1.2
-TERMUX_PKG_REVISION=1
+# NOTE: mpv has to be rebuilt and version bumped after updating ffmpeg.
+TERMUX_PKG_VERSION=4.2.1
+TERMUX_PKG_REVISION=3
 TERMUX_PKG_SRCURL=https://www.ffmpeg.org/releases/ffmpeg-${TERMUX_PKG_VERSION}.tar.xz
-TERMUX_PKG_SHA256=619e706d662c8420859832ddc259cd4d4096a48a2ce1eefd052db9e440eef3dc
-TERMUX_PKG_DEPENDS="freetype, game-music-emu, libaom, libandroid-glob, libass, libbluray, libbz2, libdav1d, libgnutls, libiconv, liblzma, libmp3lame, libopus, librav1e, libsoxr, libtheora, libvorbis, libvpx, libvidstab, libwebp, libx264, libx265, libxml2, littlecms, xvidcore, zlib"
+TERMUX_PKG_SHA256=cec7c87e9b60d174509e263ac4011b522385fd0775292e1670ecc1180c9bb6d4
+TERMUX_PKG_DEPENDS="libass, libbz2, libiconv, libsoxr, libx264, libx265, xvidcore, libvorbis, libmp3lame, libopus, libvpx, libgnutls, libandroid-glob, freetype, zlib, liblzma"
 TERMUX_PKG_CONFLICTS="libav"
 TERMUX_PKG_BREAKS="ffmpeg-dev"
 TERMUX_PKG_REPLACES="ffmpeg-dev"
 
-
 termux_step_configure() {
 	cd $TERMUX_PKG_BUILDDIR
+
+	export ASFLAGS="-no-integrated-as"
 
 	local _EXTRA_CONFIGURE_FLAGS=""
 	if [ $TERMUX_ARCH = "arm" ]; then
@@ -33,49 +34,37 @@ termux_step_configure() {
 		termux_error_exit "Unsupported arch: $TERMUX_ARCH"
 	fi
 
+	# --disable-lzma to avoid problem with shared library clashes, see
+	# https://github.com/termux/termux-packages/issues/511
+	# Only used for LZMA compression support for tiff decoder.
 	$TERMUX_PKG_SRCDIR/configure \
-		--arch="${_ARCH}" \
-		--as="$AS" \
-		--cc="$CC" \
-		--cxx="$CXX" \
-		--nm="$NM" \
-		--pkg-config="$PKG_CONFIG" \
-		--strip="$STRIP" \
-		--cross-prefix="${TERMUX_HOST_PLATFORM}-" \
+		--arch=${_ARCH} \
+		--as=$AS \
+		--cc=$CC \
+		--cxx=$CXX \
+		--cross-prefix=${TERMUX_HOST_PLATFORM}- \
 		--disable-indevs \
 		--disable-outdevs \
 		--enable-indev=lavfi \
 		--disable-static \
 		--disable-symver \
+		--disable-lzma \
 		--enable-cross-compile \
 		--enable-gnutls \
 		--enable-gpl \
-		--enable-lcms2 \
-		--enable-libaom \
 		--enable-libass \
-		--enable-libbluray \
-		--enable-libdav1d \
-		--enable-libgme \
 		--enable-libmp3lame \
 		--enable-libfreetype \
 		--enable-libvorbis \
 		--enable-libopus \
-		--enable-librav1e \
-		--enable-libsoxr \
 		--enable-libx264 \
 		--enable-libx265 \
 		--enable-libxvid \
-		--enable-libvidstab \
 		--enable-libvpx \
-		--enable-libwebp \
-		--enable-libxml2 \
-		--enable-libtheora \
 		--enable-shared \
-		--prefix="$TERMUX_PREFIX" \
+		--enable-libsoxr \
+		--prefix=$TERMUX_PREFIX \
 		--target-os=android \
 		--extra-libs="-landroid-glob" \
-		--disable-vulkan \
-		$_EXTRA_CONFIGURE_FLAGS \
-		--disable-libfdk-aac
-	# GPLed FFmpeg binaries linked against fdk-aac are not redistributable.
+		$_EXTRA_CONFIGURE_FLAGS
 }

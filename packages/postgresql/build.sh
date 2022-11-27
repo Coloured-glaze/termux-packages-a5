@@ -1,12 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://www.postgresql.org
 TERMUX_PKG_DESCRIPTION="Object-relational SQL database"
-TERMUX_PKG_LICENSE="PostgreSQL"
-TERMUX_PKG_LICENSE_FILE="COPYRIGHT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=15.1
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_MAINTAINER='Vishal Biswas @vishalbiswas'
+TERMUX_PKG_VERSION=11.5
+TERMUX_PKG_REVISION=2
 TERMUX_PKG_SRCURL=https://ftp.postgresql.org/pub/source/v$TERMUX_PKG_VERSION/postgresql-$TERMUX_PKG_VERSION.tar.bz2
-TERMUX_PKG_SHA256=64fdf23d734afad0dfe4077daca96ac51dcd697e68ae2d3d4ca6c45cb14e21ae
-TERMUX_PKG_DEPENDS="libandroid-execinfo, libandroid-shmem, libicu, libuuid, libxml2, openssl, readline, zlib"
+TERMUX_PKG_SHA256=7fdf23060bfc715144cbf2696cf05b0fa284ad3eb21f0c378591c6bca99ad180
+TERMUX_PKG_DEPENDS="openssl, libcrypt, readline, libandroid-shmem, libuuid, libxml2, libicu, zlib"
 # - pgac_cv_prog_cc_ldflags__Wl___as_needed: Inform that the linker supports as-needed. It's
 #   not stricly necessary but avoids unnecessary linking of binaries.
 # - USE_UNNAMED_POSIX_SEMAPHORES: Avoid using System V semaphores which are disabled on Android.
@@ -24,17 +24,17 @@ USE_UNNAMED_POSIX_SEMAPHORES=1
 --with-uuid=e2fs
 ZIC=$TERMUX_PKG_HOSTBUILD_DIR/src/timezone/zic
 "
+TERMUX_PKG_EXTRA_MAKE_ARGS=" -s"
 TERMUX_PKG_RM_AFTER_INSTALL="lib/libecpg* bin/ecpg share/man/man1/ecpg.1"
 TERMUX_PKG_HOSTBUILD=true
 TERMUX_PKG_BREAKS="postgresql-contrib (<= 10.3-1), postgresql-dev"
 TERMUX_PKG_REPLACES="postgresql-contrib (<= 10.3-1), postgresql-dev"
-TERMUX_PKG_SERVICE_SCRIPT=("postgres" "mkdir -p ~/.postgres\nif [ -f \"~/.postgres/postgresql.conf\" ]; then DATADIR=\"~/.postgres\"; else DATADIR=\"$TERMUX_PREFIX/var/lib/postgresql\"; fi\nexec postgres -D \$DATADIR 2>&1")
 
 termux_step_host_build() {
 	# Build a native zic binary which we have patched to
 	# use symlinks instead of hard links.
 	$TERMUX_PKG_SRCDIR/configure --without-readline
-	make
+	make ./src/timezone/zic
 }
 
 termux_step_pre_configure() {
@@ -51,20 +51,22 @@ termux_step_post_make_install() {
 
 	for contrib in \
 		hstore \
-		citext \
-		dblink \
 		pageinspect \
 		pgcrypto \
 		pgrowlocks \
 		pg_freespacemap \
 		pg_stat_statements\
 		pg_trgm \
-		postgres_fdw \
 		fuzzystrmatch \
 		unaccent \
 		uuid-ossp \
-		btree_gist \
 		; do
 		(cd contrib/$contrib && make -s -j $TERMUX_MAKE_PROCESSES install)
 	done
+}
+
+termux_step_post_massage() {
+	# Remove bin/pg_config so e.g. php doesn't try to use it, which won't
+	# work as it's a cross-compiled binary:
+	rm $TERMUX_PREFIX/bin/pg_config
 }

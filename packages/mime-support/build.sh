@@ -1,11 +1,10 @@
-TERMUX_PKG_HOMEPAGE=https://pagure.io/mailcap
-TERMUX_PKG_DESCRIPTION="Modern mime.types file from mailcap"
-TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-_VERSION=2.1.53
-TERMUX_PKG_VERSION=1:${_VERSION}
-TERMUX_PKG_SRCURL=https://pagure.io/mailcap/archive/r${_VERSION//./-}/mailcap-r${_VERSION//./-}.tar.gz
-TERMUX_PKG_SHA256=4f4195e2b3c7ffb656fe36ae05038fa31d81cd87efc4067f130d060ecdc863b2
+TERMUX_PKG_HOMEPAGE=https://packages.debian.org/en/stretch/mime-support
+TERMUX_PKG_DESCRIPTION="MIME type associations for file types"
+TERMUX_PKG_LICENSE="Public Domain"
+TERMUX_PKG_VERSION=3.64
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=http://http.debian.net/debian/pool/main/m/mime-support/mime-support_$TERMUX_PKG_VERSION.tar.xz
+TERMUX_PKG_SHA256=587f35aabd25e9cabd9be485ce94539fb783d5b8d23492798dbec320ee6b1e88
 TERMUX_PKG_PLATFORM_INDEPENDENT=true
 TERMUX_PKG_CONFFILES="etc/mime.types"
 # etc/mime.types was previously in mutt:

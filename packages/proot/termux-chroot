@@ -1,7 +1,6 @@
 #!/bin/sh
 
 SCRIPTNAME=termux-chroot
-PREFIX=@TERMUX_PREFIX@
 show_usage () {
 	echo "Usage: $SCRIPTNAME [command]"
 	echo "termux-chroot: Setup a chroot to mimic a normal Linux file system"
@@ -21,11 +20,8 @@ do
 done
 shift $(($OPTIND-1))
 
-# Kill processes on exit to avoid hanging on exit
-ARGS="--kill-on-exit"
-
 # For the /system/bin/linker(64) to be found:
-ARGS="$ARGS -b /system:/system"
+ARGS="-b /system:/system"
 
 # On some devices /vendor is required for termux packages to work correctly
 # See https://github.com/termux/proot/issues/2#issuecomment-303995382
@@ -41,17 +37,6 @@ if [ -d /sbin ] && [ -d /root ]; then
 	# Both of these directories exist under Android even without Magisk installed,
 	# The existence check is to ensure that it doesn't break if this changes.
 	ARGS="$ARGS -b /sbin:/sbin -b /root:/root"
-fi
-
-# Android 10 needs /apex for /system/bin/linker:
-# https://github.com/termux/proot/issues/95#issuecomment-584779998
-if [ -d /apex ]; then
-	ARGS="$ARGS -b /apex:/apex"
-fi
-
-# Android 11.
-if [ -e "/linkerconfig/ld.config.txt" ]; then
-	ARGS="$ARGS -b /linkerconfig/ld.config.txt:/linkerconfig/ld.config.txt"
 fi
 
 if [ -f /property_contexts ]; then

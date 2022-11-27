@@ -1,10 +1,10 @@
 TERMUX_PKG_HOMEPAGE=https://talloc.samba.org/talloc/doc/html/index.html
 TERMUX_PKG_DESCRIPTION="Hierarchical, reference counted memory pool system with destructors"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2.3.4
+TERMUX_PKG_VERSION=2.1.14
+TERMUX_PKG_REVISION=4
 TERMUX_PKG_SRCURL=https://www.samba.org/ftp/talloc/talloc-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=179f9ebe265e67e4ab2c26cad2b7de4b6a77c6c212f966903382869f06be6505
+TERMUX_PKG_SHA256=b185602756a628bac507fa8af8b9df92ace69d27c0add5dab93190ad7c3367ce
 TERMUX_PKG_BREAKS="libtalloc-dev"
 TERMUX_PKG_REPLACES="libtalloc-dev"
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -61,6 +61,6 @@ EOF
 
 termux_step_post_make_install() {
 	cd $TERMUX_PKG_SRCDIR/bin/default
-	$AR rcu libtalloc.a talloc*.o
+	$AR rcu libtalloc.a talloc_*.o
 	install -Dm600 libtalloc.a $TERMUX_PREFIX/lib/libtalloc.a
 }

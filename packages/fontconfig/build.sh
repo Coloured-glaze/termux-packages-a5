@@ -1,11 +1,11 @@
 TERMUX_PKG_HOMEPAGE=https://www.freedesktop.org/wiki/Software/fontconfig/
 TERMUX_PKG_DESCRIPTION="Library for configuring and customizing font access"
-TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2.14.1
-TERMUX_PKG_SRCURL=https://www.freedesktop.org/software/fontconfig/release/fontconfig-${TERMUX_PKG_VERSION}.tar.xz
-TERMUX_PKG_SHA256=298e883f6e11d2c5e6d53c8a8394de58d563902cfab934e6be12fb5a5f361ef0
-TERMUX_PKG_DEPENDS="freetype, libxml2, libpng, libuuid, ttf-dejavu, zlib"
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_VERSION=2.13.1
+TERMUX_PKG_REVISION=4
+TERMUX_PKG_SHA256=f655dd2a986d7aa97e052261b36aa67b0a64989496361eca8d604e6414006741
+TERMUX_PKG_SRCURL=https://www.freedesktop.org/software/fontconfig/release/fontconfig-${TERMUX_PKG_VERSION}.tar.bz2
+TERMUX_PKG_DEPENDS="freetype, libxml2, libpng, libuuid, zlib"
 TERMUX_PKG_BREAKS="fontconfig-dev"
 TERMUX_PKG_REPLACES="fontconfig-dev"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="

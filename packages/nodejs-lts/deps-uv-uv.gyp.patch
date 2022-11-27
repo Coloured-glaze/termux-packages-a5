@@ -1,7 +1,7 @@
-diff '--color=auto' -uNr node-v16.14.2.orig/deps/uv/uv.gyp node-v16.14.2/deps/uv/uv.gyp
---- node-v16.14.2.orig/deps/uv/uv.gyp	2022-03-18 15:06:20.271091189 +0530
-+++ node-v16.14.2/deps/uv/uv.gyp	2022-03-18 15:08:18.801091144 +0530
-@@ -40,7 +40,7 @@
+diff -u -r ../node-v9.7.1/deps/uv/uv.gyp ./deps/uv/uv.gyp
+--- ../node-v9.7.1/deps/uv/uv.gyp	2018-03-02 01:58:02.000000000 +0000
++++ ./deps/uv/uv.gyp	2018-03-05 10:51:15.530165566 +0000
+@@ -39,7 +39,7 @@
      {
        'target_name': 'libuv',
        'type': '<(uv_library)',
@@ -10,7 +10,7 @@ diff '--color=auto' -uNr node-v16.14.2.orig/deps/uv/uv.gyp node-v16.14.2/deps/uv
          'include',
          'src/',
        ],
-@@ -55,7 +55,7 @@
+@@ -54,7 +54,7 @@
            '<@(shared_unix_defines)',
            '<@(shared_zos_defines)',
          ],
@@ -19,11 +19,3 @@ diff '--color=auto' -uNr node-v16.14.2.orig/deps/uv/uv.gyp node-v16.14.2/deps/uv
          'conditions': [
            ['OS == "linux"', {
              'defines': [ '_POSIX_C_SOURCE=200112' ],
-@@ -247,6 +247,7 @@
-             'src/unix/procfs-exepath.c',
-             'src/unix/random-getrandom.c',
-             'src/unix/random-sysctl-linux.c',
-+            'src/unix/epoll.c',
-           ],
-           'link_settings': {
-             'libraries': [ '-ldl', '-lrt' ],

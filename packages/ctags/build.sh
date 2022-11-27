@@ -1,16 +1,17 @@
 TERMUX_PKG_HOMEPAGE=https://ctags.io/
 TERMUX_PKG_DESCRIPTION="Universal ctags: Source code index builder"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2:5.9.20221106.0
-TERMUX_PKG_SRCURL=https://github.com/universal-ctags/ctags/archive/p${TERMUX_PKG_VERSION:2}.tar.gz
-TERMUX_PKG_SHA256=8e647fa314a33088d7e8384a9aca3903ce91dfe8805676d4219051d5353cf0ab
-TERMUX_PKG_DEPENDS="libiconv, libjansson, libxml2, libyaml"
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-tmpdir=$TERMUX_PREFIX/tmp --disable-static"
+TERMUX_PKG_VERSION=0.0.20190412
+TERMUX_PKG_REVISION=2
+local _COMMIT=61cc66cfc796e707cfb13c5fed493af280378c75
+TERMUX_PKG_SHA256=479abda4686fafd11cae40f646c2b692cc0209783d233b2534b339b838af9acc
+TERMUX_PKG_SRCURL=https://github.com/universal-ctags/ctags/archive/${_COMMIT}.zip
+TERMUX_PKG_DEPENDS="libiconv"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-tmpdir=$TERMUX_PREFIX/tmp"
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_HOSTBUILD=true
 
-termux_step_post_get_source() {
+termux_step_post_extract_package() {
 	export regcomp_works=yes
 	./autogen.sh
 }

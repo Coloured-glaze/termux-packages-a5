@@ -1,10 +1,15 @@
+##
+##  COMPLETELY UNTESTED.
+##
+
 TERMUX_PKG_HOMEPAGE=https://openldap.org
 TERMUX_PKG_DESCRIPTION="OpenLDAP server"
 TERMUX_PKG_LICENSE="OpenLDAP"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2.5.13
-TERMUX_PKG_SRCURL=https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${TERMUX_PKG_VERSION}.tgz
-TERMUX_PKG_SHA256=ee3c430c4ef7b87c57b622108c7339376d6c27fbbf2767770be3de1df63d008c
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=2.4.48
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-$TERMUX_PKG_VERSION.tgz
+TERMUX_PKG_SHA256=d9523ffcab5cd14b709fcf3cb4d04e8bc76bb8970113255f372bc74954c6074d
 TERMUX_PKG_DEPENDS="libsasl, libuuid, openssl"
 TERMUX_PKG_BREAKS="openldap-dev"
 TERMUX_PKG_REPLACES="openldap-dev"
@@ -27,12 +32,4 @@ termux_step_pre_configure() {
 
 termux_step_make_install() {
 	make STRIP="" install
-
-	local slot=${TERMUX_PKG_VERSION%.*}
-	for lib in lber ldap; do
-		local target=lib${lib}-${slot}.so
-		if [ -e $TERMUX_PREFIX/lib/${target} ]; then
-			ln -sf ${target} $TERMUX_PREFIX/lib/lib${lib}.so
-		fi
-	done
 }

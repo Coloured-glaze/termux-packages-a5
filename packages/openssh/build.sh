@@ -1,11 +1,11 @@
 TERMUX_PKG_HOMEPAGE=https://www.openssh.com/
 TERMUX_PKG_DESCRIPTION="Secure shell for logging into a remote machine"
 TERMUX_PKG_LICENSE="BSD"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=9.1p1
+TERMUX_PKG_VERSION=8.1p1
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=02f5dbef3835d0753556f973cd57b4c19b6b1f6cd24c03445e23ac77ca1b93ff
 TERMUX_PKG_SRCURL=https://fastly.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=19f85009c7e3e23787f0236fbb1578392ab4d4bf9f8ec5fe6bc1cd7e8bfdd288
-TERMUX_PKG_DEPENDS="krb5, ldns, libandroid-support, libedit, openssh-sftp-server, openssl, termux-auth, zlib"
+TERMUX_PKG_DEPENDS="libandroid-support, ldns, openssl, libedit, libutil, termux-auth, krb5, zlib"
 TERMUX_PKG_CONFLICTS="dropbear"
 # --disable-strip to prevent host "install" command to use "-s", which won't work for target binaries:
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
@@ -39,14 +39,9 @@ ac_cv_header_sys_un_h=yes
 ac_cv_search_getrrsetbyname=no
 ac_cv_func_bzero=yes
 "
-# Configure script require this variable to set
-# prefixed path to program 'passwd'
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS+="PATH_PASSWD_PROG=${TERMUX_PREFIX}/bin/passwd"
-
 TERMUX_PKG_MAKE_INSTALL_TARGET="install-nokeys"
 TERMUX_PKG_RM_AFTER_INSTALL="bin/slogin share/man/man1/slogin.1"
-TERMUX_PKG_CONFFILES="etc/ssh/ssh_config etc/ssh/sshd_config"
-TERMUX_PKG_SERVICE_SCRIPT=("sshd" 'exec sshd -D -e 2>&1')
+TERMUX_PKG_CONFFILES="etc/ssh/ssh_config etc/ssh/sshd_config var/service/sshd/run var/service/sshd/log/run"
 
 termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
@@ -57,8 +52,13 @@ termux_step_pre_configure() {
 
 	autoreconf
 
-	CPPFLAGS+=" -DHAVE_ATTRIBUTE__SENTINEL__=1 -DBROKEN_SETRESGID"
+    ## Configure script require this variable to set
+    ## prefixed path to program 'passwd'
+    export PATH_PASSWD_PROG="${TERMUX_PREFIX}/bin/passwd"
+
+	CPPFLAGS+=" -DHAVE_ATTRIBUTE__SENTINEL__=1 -DBROKEN_SETRESGID -DTERMUX_EXPOSE_FILE_OFFSET64"
 	LD=$CC # Needed to link the binaries
+	LDFLAGS+=" -llog" # liblog for android logging in syslog hack
 }
 
 termux_step_post_configure() {
@@ -73,12 +73,10 @@ termux_step_post_make_install() {
 	install -Dm700 $TERMUX_PKG_BUILDER_DIR/source-ssh-agent.sh $TERMUX_PREFIX/bin/source-ssh-agent
 	install -Dm700 $TERMUX_PKG_BUILDER_DIR/ssh-with-agent.sh $TERMUX_PREFIX/bin/ssha
 	install -Dm700 $TERMUX_PKG_BUILDER_DIR/sftp-with-agent.sh $TERMUX_PREFIX/bin/sftpa
-	install -Dm700 $TERMUX_PKG_BUILDER_DIR/scp-with-agent.sh $TERMUX_PREFIX/bin/scpa
 
 	# Install ssh-copy-id:
-	sed -e "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" \
-		$TERMUX_PKG_BUILDER_DIR/ssh-copy-id.sh \
-		> $TERMUX_PREFIX/bin/ssh-copy-id
+	cp $TERMUX_PKG_SRCDIR/contrib/ssh-copy-id.1 $TERMUX_PREFIX/share/man/man1/
+	cp $TERMUX_PKG_SRCDIR/contrib/ssh-copy-id $TERMUX_PREFIX/bin/
 	chmod +x $TERMUX_PREFIX/bin/ssh-copy-id
 
 	mkdir -p $TERMUX_PREFIX/var/run
@@ -86,6 +84,16 @@ termux_step_post_make_install() {
 
 	mkdir -p $TERMUX_PREFIX/etc/ssh/
 	cp $TERMUX_PKG_SRCDIR/moduli $TERMUX_PREFIX/etc/ssh/moduli
+
+	# Setup sshd services
+	mkdir -p $TERMUX_PREFIX/var/service
+	cd $TERMUX_PREFIX/var/service
+	mkdir -p sshd/log
+	echo "#!$TERMUX_PREFIX/bin/sh" > sshd/run
+	echo 'exec sshd -D -e 2>&1' >> sshd/run
+	chmod +x sshd/run
+	touch sshd/down
+	ln -sf $TERMUX_PREFIX/share/termux-services/svlogger sshd/log/run
 }
 
 termux_step_post_massage() {

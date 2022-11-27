@@ -1,13 +1,12 @@
-TERMUX_PKG_HOMEPAGE=https://github.com/rkd77/elinks
+TERMUX_PKG_HOMEPAGE=http://elinks.or.cz
 TERMUX_PKG_DESCRIPTION="Full-Featured Text WWW Browser"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.15.1"
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SRCURL=https://github.com/rkd77/elinks/releases/download/v${TERMUX_PKG_VERSION}/elinks-${TERMUX_PKG_VERSION}.tar.xz
-TERMUX_PKG_SHA256=cca1864d472f2314dc6ffb40d1f20126f09866a55a0d154961907f054095944f
+_COMMIT=f86be659718c0cd0a67f88b42f07044c23d0d028
+TERMUX_PKG_VERSION=0.13.GIT
+TERMUX_PKG_REVISION=5
+TERMUX_PKG_SRCURL=https://github.com/xeffyr/elinks/archive/${_COMMIT}.zip
+TERMUX_PKG_SHA256=3e65aaabcc4f6b2418643cf965786c00e3f196330f3e7863ca83f9e546d5e609
 TERMUX_PKG_DEPENDS="libexpat, libiconv, libidn, openssl, libbz2, zlib"
-TERMUX_PKG_AUTO_UPDATE=true
 
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --enable-256-colors
@@ -15,11 +14,11 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --mandir=$TERMUX_PREFIX/share/man
 --with-openssl
 --without-brotli
---without-zstd
+--without-gc
 "
 
 TERMUX_MAKE_PROCESSES=1
 
 termux_step_pre_configure() {
-	./autogen.sh
+    ./autogen.sh
 }

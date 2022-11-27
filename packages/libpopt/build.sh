@@ -1,10 +1,10 @@
-TERMUX_PKG_HOMEPAGE=https://www.linuxfromscratch.org/blfs/view/svn/general/popt.html
+TERMUX_PKG_HOMEPAGE=http://www.linuxfromscratch.org/blfs/view/svn/general/popt.html
 TERMUX_PKG_DESCRIPTION="Library for parsing cmdline parameters"
-TERMUX_PKG_LICENSE="MIT"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=1.19
-TERMUX_PKG_SRCURL=http://ftp.rpm.org/popt/releases/popt-1.x/popt-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=c25a4838fc8e4c1c8aacb8bd620edb3084a3d63bf8987fdad3ca2758c63240f9
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_VERSION=1.16
+TERMUX_PKG_REVISION=4
+TERMUX_PKG_SRCURL=https://fossies.org/linux/misc/popt-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=e728ed296fe9f069a0e005003c3d6b2dde3d9cad453422a10d6558616d304cc8
 TERMUX_PKG_DEPENDS="libandroid-glob"
 TERMUX_PKG_BREAKS="libpopt-dev"
 TERMUX_PKG_REPLACES="libpopt-dev"

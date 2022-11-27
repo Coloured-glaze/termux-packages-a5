@@ -1,13 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/JuliaLang/utf8proc
 TERMUX_PKG_DESCRIPTION="Library for processing UTF-8 Unicode data"
 TERMUX_PKG_LICENSE="BSD"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="2.8.0"
-TERMUX_PKG_SRCURL=https://github.com/JuliaLang/utf8proc/archive/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=a0a60a79fe6f6d54e7d411facbfcc867a6e198608f2cd992490e46f04b1bcecc
-TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_VERSION=2.4.0
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=b2e5d547c1d94762a6d03a7e05cea46092aab68636460ff8648f1295e2cdfbd7
 TERMUX_PKG_BREAKS="utf8proc-dev"
 TERMUX_PKG_REPLACES="utf8proc-dev"
+TERMUX_PKG_SRCURL=https://github.com/JuliaLang/utf8proc/archive/v${TERMUX_PKG_VERSION}.tar.gz
 TERMUX_PKG_BUILD_IN_SRC=true
 
 termux_step_pre_configure() {

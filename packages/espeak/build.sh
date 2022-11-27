@@ -1,40 +1,43 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/espeak-ng/espeak-ng
 TERMUX_PKG_DESCRIPTION="Compact software speech synthesizer"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
 # Use eSpeak NG as the original eSpeak project is dead.
-TERMUX_PKG_VERSION="1.51"
-TERMUX_PKG_SRCURL="https://github.com/espeak-ng/espeak-ng/archive/${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=f0e028f695a8241c4fa90df7a8c8c5d68dcadbdbc91e758a97e594bbb0a3bdbf
-TERMUX_PKG_AUTO_UPDATE=true
-TERMUX_PKG_DEPENDS="libc++, pcaudiolib"
+# See https://github.com/espeak-ng/espeak-ng/issues/180
+# about cross compilation of espeak-ng.
+TERMUX_PKG_VERSION=1.49.2
+TERMUX_PKG_REVISION=4
+TERMUX_PKG_SRCURL=https://github.com/espeak-ng/espeak-ng/releases/download/${TERMUX_PKG_VERSION}/espeak-ng-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=cf7ed86850b99bafe819548c73a6651a74300980dd15f319ff22e2bd72ea20b4
 TERMUX_PKG_BREAKS="espeak-dev"
 TERMUX_PKG_REPLACES="espeak-dev"
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_HOSTBUILD=true
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--with-async --with-pcaudiolib"
+TERMUX_PKG_RM_AFTER_INSTALL="lib/*ng-test*"
+# --without-async due to that using pthread_cancel().
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--without-async"
 
-termux_step_post_get_source() {
+termux_step_post_extract_package() {
 	# Certain packages are not safe to build on device because their
 	# build.sh script deletes specific files in $TERMUX_PREFIX.
-	if ${TERMUX_ON_DEVICE_BUILD}; then
-		termux_error_exit "Package '${TERMUX_PKG_NAME}' is not safe for on-device builds."
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
 	fi
 
 	./autogen.sh
 }
 
 termux_step_host_build() {
-	cd "${TERMUX_PKG_SRCDIR}" || exit 1
-	./configure && make
+	cp -Rf $TERMUX_PKG_SRCDIR/* .
+	unset MAKEFLAGS
+	./configure --prefix=$TERMUX_PREFIX
+	make -j$TERMUX_MAKE_PROCESSES src/{e,}speak-ng
+
 	# Man pages require the ronn ruby program.
 	#make src/espeak-ng.1
 	#cp src/espeak-ng.1 $TERMUX_PREFIX/share/man/man1
 	#(cd $TERMUX_PREFIX/share/man/man1 && ln -s -f espeak-ng.1 espeak.1)
-}
 
-termux_step_make() {
-	make -B src/{e,}speak-ng
+	make install
 }
 
 termux_step_pre_configure() {
@@ -42,9 +45,14 @@ termux_step_pre_configure() {
 	CFLAGS=${CFLAGS/Oz/Os}
 }
 
+termux_step_make() {
+	# Prevent caching of host build:
+	rm -Rf $TERMUX_PKG_HOSTBUILD_DIR
+	make -j$TERMUX_MAKE_PROCESSES src/{e,}speak-ng
+}
+
 termux_step_make_install() {
-	# Calling make install directly tends to build lang data files again but with cross compiled espeak-ng.
-	# So use make install-data which will install the data files compiled with previously built espeak-ng
-	# in host build step.
-	make install-data install-exec
+	rm $TERMUX_PREFIX/bin/{e,}speak{,-ng}
+	cp src/.libs/espeak-ng $TERMUX_PREFIX/bin/espeak
+	cp src/.libs/libespeak-ng.so $TERMUX_PREFIX/lib/libespeak-ng.so.1.1.49
 }

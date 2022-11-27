@@ -1,18 +1,12 @@
 TERMUX_PKG_HOMEPAGE=https://github.com/termux/termux-elf-cleaner
 TERMUX_PKG_DESCRIPTION="Cleaner of ELF files for Android"
 TERMUX_PKG_LICENSE="GPL-3.0"
-TERMUX_PKG_MAINTAINER="@termux"
-# Please update checksum in termux_step_start_build.sh as well if
-# updating the package.
-TERMUX_PKG_VERSION=2.1.1
-TERMUX_PKG_REVISION=2
+# NOTE: The termux-elf-cleaner.cpp file is used by build-package.sh
+#       to create a native binary. Bumping this version will need
+#       updating the checksum used there.
+TERMUX_PKG_VERSION=1.8
+TERMUX_PKG_REVISION=1
 TERMUX_PKG_SRCURL=https://github.com/termux/termux-elf-cleaner/archive/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=104231f91ef6662f80694fc4a59c6bfeae50da21c4fc22adac3c9a5aac00ba98
+TERMUX_PKG_SHA256=c5870051fc996a2064b4d4e2ab6139edd8add9127ab6761925e47de925100a87
 TERMUX_PKG_DEPENDS="libc++"
-
-termux_step_pre_configure() {
-	autoreconf -vfi
-
-	sed "s%@TERMUX_PKG_API_LEVEL@%$TERMUX_PKG_API_LEVEL%g" \
-		"$TERMUX_PKG_BUILDER_DIR"/android-api-level.diff | patch --silent -p1
-}
+TERMUX_PKG_BUILD_IN_SRC=true

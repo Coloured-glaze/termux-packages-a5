@@ -1,11 +1,12 @@
---- a/libarchive/archive_entry.h
-+++ b/libarchive/archive_entry.h
-@@ -98,11 +98,6 @@
+diff -u -r ../libarchive-3.2.0/libarchive/archive_entry.h ./libarchive/archive_entry.h
+--- ../libarchive-3.2.0/libarchive/archive_entry.h	2016-04-30 00:44:07.000000000 -0400
++++ ./libarchive/archive_entry.h	2016-05-02 19:58:22.878678982 -0400
+@@ -75,11 +75,6 @@
  # define	__LA_MODE_T	mode_t
  #endif
  
 -/* Large file support for Android */
--#if defined(__LIBARCHIVE_BUILD) && defined(__ANDROID__)
+-#ifdef __ANDROID__
 -#include "android_lf.h"
 -#endif
 -

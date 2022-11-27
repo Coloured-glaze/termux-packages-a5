@@ -1,28 +1,36 @@
 TERMUX_PKG_HOMEPAGE=https://www.cryptopp.com/
 TERMUX_PKG_DESCRIPTION="A free C++ class library of cryptographic schemes"
-TERMUX_PKG_LICENSE="BSL-1.0, BSD 3-Clause"
-TERMUX_PKG_LICENSE_FILE="License.txt"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=8.7.0
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SRCURL=https://github.com/weidai11/cryptopp/archive/refs/tags/CRYPTOPP_${TERMUX_PKG_VERSION//./_}.tar.gz
-TERMUX_PKG_SHA256=8d6a4064b8e9f34cd3e838f5a12c40067ee7b95ee37d9173ec273cb0913e7ca2
-TERMUX_PKG_AUTO_UPDATE=true
-TERMUX_PKG_UPDATE_VERSION_REGEXP="\d+.\d+.\d+"
-TERMUX_PKG_DEPENDS="libc++, libcpufeatures"
+TERMUX_PKG_LICENSE="BSL-1.0"
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
+TERMUX_PKG_VERSION=8.2.0
+TERMUX_PKG_REVISION=6
+TERMUX_PKG_SRCURL=https://www.cryptopp.com/cryptopp${TERMUX_PKG_VERSION//./}.zip
+TERMUX_PKG_SHA256=03f0e2242e11b9d19b28d0ec5a3fa8ed5cc7b27640e6bed365744f593e858058
 TERMUX_PKG_BREAKS="cryptopp-dev"
 TERMUX_PKG_REPLACES="cryptopp-dev"
+TERMUX_PKG_SKIP_SRC_EXTRACT=true
 TERMUX_PKG_BUILD_IN_SRC=true
-TERMUX_PKG_MAKE_INSTALL_TARGET="install-lib"
 
 TERMUX_PKG_RM_AFTER_INSTALL="
 bin/
 share/cryptopp/
 "
 
-termux_step_pre_configure() {
-	export CXXFLAGS+=" -fPIC -I$TERMUX_PREFIX/include/ndk_compat -fPIC"
-	export TERMUX_PKG_EXTRA_MAKE_ARGS+=" all static dynamic libcryptopp.pc CC=$CC CXX=$CXX"
-	export CFLAGS+=" -I$TERMUX_PREFIX/include/ndk_compat"
-	export LDFLAGS+=" -l:libndk_compat.a"
+termux_step_extract_package() {
+	mkdir -p $TERMUX_PKG_CACHEDIR
+	termux_download $TERMUX_PKG_SRCURL $TERMUX_PKG_CACHEDIR/cryptopp.zip \
+		$TERMUX_PKG_SHA256
+
+	mkdir -p $TERMUX_PKG_SRCDIR
+	cd $TERMUX_PKG_SRCDIR
+	unzip $TERMUX_PKG_CACHEDIR/cryptopp.zip
+}
+
+termux_step_make() {
+	CXXFLAGS+=" -fPIC -DCRYPTOPP_DISABLE_ASM"
+	make -j $TERMUX_MAKE_PROCESSES dynamic libcryptopp.pc CC=$CC CXX=$CXX
+}
+
+termux_step_make_install() {
+	make install-lib PREFIX=$TERMUX_PREFIX
 }

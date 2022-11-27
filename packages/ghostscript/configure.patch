@@ -1,20 +1,11 @@
---- a/configure
-+++ b/configure
-@@ -4080,7 +4080,7 @@
+--- ./configure	2017-03-16 10:12:59.000000000 +0000
++++ ./configure	2017-03-18 15:14:30.363309054 +0000
+@@ -3772,7 +3772,7 @@
+   echo $AUXFLAGS_MAK_LINE06 >> $AUXFLAGS_MAK.in
+   echo $AUXFLAGS_MAK_LINE07 >> $AUXFLAGS_MAK.in
  
-   { $as_echo "$as_me:${as_lineno-$LINENO}: Begin recursive call to configure script (for auxiliary tools)" >&5
- $as_echo "$as_me: Begin recursive call to configure script (for auxiliary tools)" >&6;}
--  "$absolute_source_path/configure" CC="$CCAUX" CFLAGS="$CFLAGSAUX" CPPFLAGS="$CPPFLAGSAUX" LDFLAGS="$LDFLAGSAUX" CCAUX= CFLAGSAUX= CFLAGSAUX= MAKEFILE=$AUXFLAGS_MAK --host=$build --build=$build --enable-auxtools_only --disable-hidden-visibility --with-local-zlib --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-jbig2dec --without-x --with-drivers=""
-+  "$absolute_source_path/configure" CC="$CCAUX" CFLAGS="$CFLAGSAUX" CPPFLAGS="$CPPFLAGSAUX" LDFLAGS="$LDFLAGSAUX" CCAUX= CFLAGSAUX= CFLAGSAUX= MAKEFILE=$AUXFLAGS_MAK --host=$build --build=$build --enable-auxtools_only --disable-hidden-visibility --with-local-zlib --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-jbig2dec --without-x --with-drivers="" --without-pdf
+-  ../$0 CC="$CCAUX" CFLAGS="$CFLAGSAUX" LDFLAGS="$LDFLAGSAUX" CCAUX= CFLAGSAUX= CFLAGSAUX= MAKEFILE=$AUXFLAGS_MAK --host= --build= --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-luratech --without-jbig2dec --without-x --with-drivers=""
++  $0 CC="$CCAUX" CFLAGS="$CFLAGSAUX" LDFLAGS="$LDFLAGSAUX" CCAUX= CFLAGSAUX= CFLAGSAUX= MAKEFILE=$AUXFLAGS_MAK --host= --build= --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-luratech --without-jbig2dec --without-x --with-drivers=""
    status=$?
-   cp config.log "$olddir/configaux.log"
+   cp config.log ../configaux.log
    if test $status -eq 0 ; then
-@@ -6648,7 +6648,7 @@
- if test "x$ac_cv_lib_pthread_pthread_create" = xyes; then :
- 
-       SYNC=posync;
--      PTHREAD_LIBS="-lpthread"
-+      PTHREAD_LIBS=""
- 
- fi
- 

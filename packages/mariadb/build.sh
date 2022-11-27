@@ -1,33 +1,33 @@
 TERMUX_PKG_HOMEPAGE=https://mariadb.org
 TERMUX_PKG_DESCRIPTION="A drop-in replacement for mysql server"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2:10.9.4
-TERMUX_PKG_SRCURL=http://ftp.hosteurope.de/mirror/archive.mariadb.org/mariadb-${TERMUX_PKG_VERSION:2}/source/mariadb-${TERMUX_PKG_VERSION:2}.tar.gz
-TERMUX_PKG_SHA256=1dff08a0f37ea5cf8f00cbd12d40e80759fae7d73184ccf56b5b51acfdcfc054
-TERMUX_PKG_DEPENDS="libandroid-support, libc++, libcrypt, libedit, liblz4, liblzma, ncurses, openssl, pcre2, zlib"
+TERMUX_PKG_MAINTAINER="Vishal Biswas @vishalbiswas"
+_VERSION=10.4.6
+TERMUX_PKG_VERSION=1:${_VERSION}
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=http://ftp.hosteurope.de/mirror/archive.mariadb.org/mariadb-${_VERSION}/source/mariadb-${_VERSION}.tar.gz
+TERMUX_PKG_SHA256=a270fe6169a1aaf6f2cbbc945de2c954d818c48e1a0fc02fbed92ecb94678e70
+TERMUX_PKG_DEPENDS="libc++, libiconv, liblzma, ncurses, libedit, openssl, pcre, libcrypt, libandroid-support, libandroid-glob, zlib"
 TERMUX_PKG_BREAKS="mariadb-dev"
 TERMUX_PKG_REPLACES="mariadb-dev"
-TERMUX_PKG_SERVICE_SCRIPT=("mysqld" "exec mysqld --basedir=$TERMUX_PREFIX --datadir=$TERMUX_PREFIX/var/lib/mysql 2>&1")
 
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
--DBISON_EXECUTABLE=$(command -v bison)
--DGETCONF=$(command -v getconf)
+-DBISON_EXECUTABLE=$(which bison)
+-DGETCONF=$(which getconf)
 -DBUILD_CONFIG=mysql_release
--DCAT_EXECUTABLE=$(command -v cat)
--DGIT_EXECUTABLE=$(command -v git)
+-DCAT_EXECUTABLE=$(which cat)
+-DGIT_EXECUTABLE=$(which git)
 -DGSSAPI_FOUND=NO
--DGRN_WITH_LZ4=yes
+-DGRN_WITH_LZ4=no
 -DENABLED_LOCAL_INFILE=ON
 -DHAVE_UCONTEXT_H=False
 -DIMPORT_EXECUTABLES=$TERMUX_PKG_HOSTBUILD_DIR/import_executables.cmake
 -DINSTALL_LAYOUT=DEB
--DINSTALL_UNIX_ADDRDIR=$TERMUX_PREFIX/var/run/mysqld.sock
+-DINSTALL_UNIX_ADDRDIR=$TERMUX_PREFIX/tmp/mysqld.sock
 -DINSTALL_SBINDIR=$TERMUX_PREFIX/bin
 -DMYSQL_DATADIR=$TERMUX_PREFIX/var/lib/mysql
 -DPLUGIN_AUTH_GSSAPI_CLIENT=OFF
 -DPLUGIN_AUTH_GSSAPI=NO
--DPLUGIN_AUTH_PAM=NO
 -DPLUGIN_CONNECT=NO
 -DPLUGIN_DAEMON_EXAMPLE=NO
 -DPLUGIN_EXAMPLE=NO
@@ -41,34 +41,25 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 -DWITH_JEMALLOC=OFF
 -DWITH_MARIABACKUP=OFF
 -DWITH_PCRE=system
--DWITH_LZ4=system
 -DWITH_READLINE=OFF
 -DWITH_SSL=system
 -DWITH_WSREP=False
 -DWITH_ZLIB=system
 -DWITH_INNODB_BZIP2=OFF
--DWITH_INNODB_LZ4=ON
+-DWITH_INNODB_LZ4=OFF
 -DWITH_INNODB_LZMA=ON
 -DWITH_INNODB_LZO=OFF
 -DWITH_INNODB_SNAPPY=OFF
 -DWITH_UNIT_TESTS=OFF
 -DINSTALL_SYSCONFDIR=$TERMUX_PREFIX/etc
 "
-TERMUX_PKG_HOSTBUILD=true
-TERMUX_CMAKE_BUILD="Unix Makefiles"
-TERMUX_PKG_CONFLICTS="mysql"
 
-TERMUX_PKG_RM_AFTER_INSTALL="
-bin/mysqltest*
-share/man/man1/mysql-test-run.pl.1
-share/mysql/mysql-test
-mysql-test
-sql-bench
-"
+TERMUX_PKG_HOSTBUILD=true
+TERMUX_PKG_CONFLICTS="mysql"
+TERMUX_PKG_RM_AFTER_INSTALL="bin/mysqltest*"
 
 termux_step_host_build() {
 	termux_setup_cmake
-	sed -i 's/^\s*END[(][)]/ENDIF()/g' $TERMUX_PKG_SRCDIR/libmariadb/cmake/ConnectorName.cmake
 	cmake -G "Unix Makefiles" \
 		$TERMUX_PKG_SRCDIR \
 		-DWITH_SSL=bundled \
@@ -86,11 +77,19 @@ termux_step_pre_configure() {
 	CPPFLAGS+=" -Dushort=u_short"
 
 	if [ $TERMUX_ARCH_BITS = 32 ]; then
-		CPPFLAGS+=" -D__off64_t_defined"
+		CPPFLAGS+=" -D__off64_t_defined -DTERMUX_EXPOSE_FILE_OFFSET64=1"
 	fi
 
-	sed -i 's/^\s*END[(][)]/ENDIF()/g' $TERMUX_PKG_SRCDIR/libmariadb/cmake/ConnectorName.cmake
+	if [ $TERMUX_ARCH = "i686" ]; then
+		# Avoid undefined reference to __atomic_load_8:
+		CFLAGS+=" -latomic"
+	fi
+}
 
+termux_step_post_make_install() {
+	# files not needed
+	rm -r $TERMUX_PREFIX/{mysql-test,sql-bench}
+	rm $TERMUX_PREFIX/share/man/man1/mysql-test-run.pl.1
 }
 
 termux_step_post_massage() {

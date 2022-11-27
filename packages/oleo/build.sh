@@ -1,7 +1,7 @@
 TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/oleo/
 TERMUX_PKG_DESCRIPTION="The GNU Spreadsheet"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
 TERMUX_PKG_VERSION=1.99.16
 TERMUX_PKG_REVISION=7
 TERMUX_PKG_SRCURL=http://ftp.gnu.org/gnu/oleo/oleo-$TERMUX_PKG_VERSION.tar.gz
@@ -13,7 +13,3 @@ TERMUX_PKG_KEEP_INFOPAGES=true
 TERMUX_PKG_RM_AFTER_INSTALL="
 Oleo/*
 share/oleo/oleo.html"
-
-termux_step_pre_configure() {
-	export CFLAGS+=" -fcommon"
-}

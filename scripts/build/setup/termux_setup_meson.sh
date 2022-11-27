@@ -1,14 +1,7 @@
 termux_setup_meson() {
 	termux_setup_ninja
-	local MESON_VERSION=0.61.2
-	local MESON_FOLDER
-
-	if [ "${TERMUX_PACKAGES_OFFLINE-false}" = "true" ]; then
-		MESON_FOLDER=${TERMUX_SCRIPTDIR}/build-tools/meson-${MESON_VERSION}
-	else
-		MESON_FOLDER=${TERMUX_COMMON_CACHEDIR}/meson-${MESON_VERSION}
-	fi
-
+	local MESON_VERSION=0.50.1
+	local MESON_FOLDER=$TERMUX_COMMON_CACHEDIR/meson-$MESON_VERSION-v1
 	if [ ! -d "$MESON_FOLDER" ]; then
 		local MESON_TAR_NAME=meson-$MESON_VERSION.tar.gz
 		local MESON_TAR_FILE=$TERMUX_PKG_TMPDIR/$MESON_TAR_NAME
@@ -16,23 +9,8 @@ termux_setup_meson() {
 		termux_download \
 			"https://github.com/mesonbuild/meson/releases/download/$MESON_VERSION/meson-$MESON_VERSION.tar.gz" \
 			"$MESON_TAR_FILE" \
-			0233a7f8d959079318f6052b0939c27f68a5de86ba601f25c9ee6869fb5f5889
+			f68f56d60c80a77df8fc08fa1016bc5831605d4717b622c96212573271e14ecc
 		tar xf "$MESON_TAR_FILE" -C "$TERMUX_PKG_TMPDIR"
-		if [ "$MESON_VERSION" = "0.61.2" ]; then
-			local MESON_0_61_2_GTKDOC_PATCH_FILE=$TERMUX_PKG_TMPDIR/meson-0.61.2-gtkdoc.patch
-			termux_download \
-				"https://github.com/mesonbuild/meson/commit/266e8acb5807b38a550cb5145cea0e19545a21d7.patch" \
-				"$MESON_0_61_2_GTKDOC_PATCH_FILE" \
-				79ecf0e16f613396f43621a928df6c17e6260aa190c320e5c01adad94abd07ad
-			patch --silent -p1 -d "$MESON_TMP_FOLDER" < "$MESON_0_61_2_GTKDOC_PATCH_FILE"
-		fi
-		shopt -s nullglob
-		local f
-		for f in "$TERMUX_SCRIPTDIR"/scripts/build/setup/meson-*.patch; do
-			echo "[${FUNCNAME[0]}]: Applying $(basename "$f")"
-			patch --silent -p1 -d "$MESON_TMP_FOLDER" < "$f"
-		done
-		shopt -u nullglob
 		mv "$MESON_TMP_FOLDER" "$MESON_FOLDER"
 	fi
 	TERMUX_MESON="$MESON_FOLDER/meson.py"
@@ -48,7 +26,7 @@ termux_setup_meson() {
 		MESON_CPU_FAMILY="x86_64"
 		MESON_CPU="x86_64"
 	elif [ "$TERMUX_ARCH" = "aarch64" ]; then
-		MESON_CPU_FAMILY="aarch64"
+		MESON_CPU_FAMILY="arm"
 		MESON_CPU="aarch64"
 	else
 		termux_error_exit "Unsupported arch: $TERMUX_ARCH"
@@ -58,7 +36,6 @@ termux_setup_meson() {
 	echo "[binaries]" > $TERMUX_MESON_CROSSFILE
 	echo "ar = '$AR'" >> $TERMUX_MESON_CROSSFILE
 	echo "c = '$CC'" >> $TERMUX_MESON_CROSSFILE
-	echo "cmake = 'cmake'" >> $TERMUX_MESON_CROSSFILE
 	echo "cpp = '$CXX'" >> $TERMUX_MESON_CROSSFILE
 	echo "ld = '$LD'" >> $TERMUX_MESON_CROSSFILE
 	echo "pkgconfig = '$PKG_CONFIG'" >> $TERMUX_MESON_CROSSFILE
@@ -67,9 +44,6 @@ termux_setup_meson() {
 	echo '' >> $TERMUX_MESON_CROSSFILE
 	echo "[properties]" >> $TERMUX_MESON_CROSSFILE
 	echo "needs_exe_wrapper = true" >> $TERMUX_MESON_CROSSFILE
-
-	echo '' >> $TERMUX_MESON_CROSSFILE
-	echo "[built-in options]" >> $TERMUX_MESON_CROSSFILE
 
 	echo -n "c_args = [" >> $TERMUX_MESON_CROSSFILE
 	local word first=true

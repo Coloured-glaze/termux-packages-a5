@@ -3,6 +3,7 @@
 set -e -u
 
 REPO_DIR=$(realpath "$(dirname "$0")/../")
+PACKAGES_DIR="$REPO_DIR/packages"
 
 check_package_license() {
 	local pkg_licenses=$1
@@ -28,11 +29,11 @@ check_package_license() {
 			MS-RL|MirOS|Motosoto-0.9.1|Mozilla-1.1|Multics|NASA-1.3|NAUMEN);;
 			NCSA|NOSL-3.0|NTP|NUnit-2.6.3|NUnit-Test-Adapter-2.6.3|Nethack);;
 			Nokia-1.0a|OCLC-2.0|OSL-3.0|OpenLDAP|OpenSSL|Openfont-1.1);;
-			Opengroup|PHP-3.0|PHP-3.01|PostgreSQL|"Public Domain"|"Public Domain - SUN");;
+			Opengroup|PHP-3.0|PostgreSQL|"Public Domain"|"Public Domain - SUN");;
 			PythonPL|PythonSoftFoundation|QTPL-1.0|RPL-1.5|Real-1.0|RicohPL);;
 			SUNPublic-1.0|Scala|SimPL-2.0|Sleepycat|Sybase-1.0|TMate|UPL-1.0);;
 			Unicode-DFS-2015|Unlicense|UoI-NCSA|"VIM License"|VovidaPL-1.0|W3C);;
-			WTFPL|Xnet|ZLIB|ZPL-2.0|wxWindows|X11);;
+			WTFPL|Xnet|ZLIB|ZPL-2.0|wxWindows);;
 
 			*)
 				license_ok=false
@@ -141,14 +142,6 @@ lint_package() {
 			pkg_lint_error=true
 		fi
 
-		echo -n "TERMUX_PKG_MAINTAINER: "
-		if [ -n "$TERMUX_PKG_MAINTAINER" ]; then
-			echo "PASS"
-		else
-			echo "NOT SET"
-			pkg_lint_error=true
-		fi
-
 		if [ -n "$TERMUX_PKG_API_LEVEL" ]; then
 			echo -n "TERMUX_PKG_API_LEVEL: "
 
@@ -167,12 +160,7 @@ lint_package() {
 
 		echo -n "TERMUX_PKG_VERSION: "
 		if [ -n "$TERMUX_PKG_VERSION" ]; then
-			if grep -qiP '^([0-9]+\:)?[0-9][0-9a-z+\-\.]*$' <<< "$TERMUX_PKG_VERSION"; then
-				echo "PASS"
-			else
-				echo "INVALID (contains characters that are not allowed)"
-				pkg_lint_error=true
-			fi
+			echo "PASS"
 		else
 			echo "NOT SET"
 			pkg_lint_error=true
@@ -248,8 +236,6 @@ lint_package() {
 					echo "LENGTHS OF 'TERMUX_PKG_SRCURL' AND 'TERMUX_PKG_SHA256' ARE NOT EQUAL"
 					pkg_lint_error=true
 				fi
-			elif [ "${TERMUX_PKG_SRCURL: -4}" == ".git" ]; then
-				echo "NOT SET (acceptable since TERMUX_PKG_SRCURL is git repo)"
 			else
 				echo "NOT SET"
 				pkg_lint_error=true
@@ -392,17 +378,6 @@ lint_package() {
 			unset file_path_ok
 		fi
 
-		if [ -n "$TERMUX_PKG_SERVICE_SCRIPT" ]; then
-			echo -n "TERMUX_PKG_SERVICE_SCRIPT: "
-			array_length=${#TERMUX_PKG_SERVICE_SCRIPT[@]}
-			if [ $(( $array_length & 1 )) -eq 1 ]; then
-				echo "INVALID (TERMUX_PKG_SERVICE_SCRIPT has to be an array of even length)"
-				pkg_lint_error=true
-			else
-				echo "PASS"
-			fi
-		fi
-
 		if $pkg_lint_error; then
 			exit 1
 		else
@@ -453,9 +428,7 @@ linter_main() {
 }
 
 if [ $# -eq 0 ]; then
-	for repo_dir in $(jq --raw-output 'keys | .[]' $REPO_DIR/repo.json); do
-		linter_main $repo_dir/*/build.sh
-	done || exit 1
+	linter_main "$PACKAGES_DIR"/*/build.sh || exit 1
 else
 	linter_main "$@" || exit 1
 fi

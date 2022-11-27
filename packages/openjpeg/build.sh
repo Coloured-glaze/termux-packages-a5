@@ -1,13 +1,12 @@
 TERMUX_PKG_HOMEPAGE=http://www.openjpeg.org/
 TERMUX_PKG_DESCRIPTION="JPEG 2000 image compression library"
 TERMUX_PKG_LICENSE="BSD 2-Clause"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="2.5.0"
-TERMUX_PKG_SRCURL=https://github.com/uclouvain/openjpeg/archive/v${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=0333806d6adecc6f7a91243b2b839ff4d2053823634d4f6ed7a59bc87409122a
-TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_VERSION=2.3.1
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SHA256=63f5a4713ecafc86de51bfad89cc07bb788e9bba24ebbf0c4ca637621aadb6a9
 TERMUX_PKG_BREAKS="openjpeg-dev"
 TERMUX_PKG_REPLACES="openjpeg-dev"
+TERMUX_PKG_SRCURL=https://github.com/uclouvain/openjpeg/archive/v${TERMUX_PKG_VERSION}.tar.gz
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="-DBUILD_STATIC_LIBS=OFF"
 # for fast building packages that depend on openjpeg with cmake
 

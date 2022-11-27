@@ -1,12 +1,11 @@
 TERMUX_PKG_HOMEPAGE=https://pidgin.im/
 TERMUX_PKG_DESCRIPTION="Text-based multi-protocol instant messaging client"
 TERMUX_PKG_LICENSE="GPL-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION=2.14.10
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SRCURL=https://downloads.sourceforge.net/pidgin/pidgin-${TERMUX_PKG_VERSION}.tar.bz2
-TERMUX_PKG_SHA256=454b1b928bc6bcbb183353af30fbfde5595f2245a3423a1a46e6c97a2df22810
-TERMUX_PKG_DEPENDS="glib, libgnt, libgnutls, libidn, libsasl, libxml2, ncurses"
+TERMUX_PKG_VERSION=2.13.0
+TERMUX_PKG_REVISION=4
+TERMUX_PKG_SHA256=2747150c6f711146bddd333c496870bfd55058bab22ffb7e4eb784018ec46d8f
+TERMUX_PKG_SRCURL=http://downloads.sourceforge.net/project/pidgin/Pidgin/${TERMUX_PKG_VERSION}/pidgin-${TERMUX_PKG_VERSION}.tar.bz2
+TERMUX_PKG_DEPENDS="libiconv, libgnutls, libxml2, ncurses-ui-libs, glib"
 TERMUX_PKG_BREAKS="finch-dev"
 TERMUX_PKG_REPLACES="finch-dev"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
@@ -21,7 +20,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-tcl
 --without-zephyr
 --with-ncurses-headers=$TERMUX_PREFIX/include
---without-python3
+--without-python
 "
 TERMUX_PKG_RM_AFTER_INSTALL="share/sounds/purple lib/purple-2/libmsn.so"
 
