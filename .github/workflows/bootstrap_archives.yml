@@ -1,10 +1,9 @@
 name: Generate bootstrap archives (android-5)
 
-
 on:
   push:
-    tags:
-    - 'v*'
+    branches:
+      - main
     
   workflow_dispatch:
 
