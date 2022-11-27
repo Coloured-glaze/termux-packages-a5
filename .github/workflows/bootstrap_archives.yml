@@ -4,19 +4,12 @@ on:
   push:
     branches:
       - main
-    
+    tags:
+      - "v*"
   workflow_dispatch:
-
-permissions: {} # none
-
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
 
 jobs:
   build:
-    permissions:
-      contents: read # actions/upload-artifact doesn't need contents: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,8 +29,6 @@ jobs:
           name: bootstrap-archives-${{ github.sha }}
           path: "*.zip"
   publish:
-    permissions:
-      contents: write # for git push
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +44,6 @@ jobs:
       - name: Get checksums
         id: get_checksums
         run: |
-          find . -maxdepth 1 -type f -name "bootstrap-*.zip" -exec sha256sum {} \; | sed "s| ./| |g" | sort -k2 > bootstraps.sha256sum
           checksums=$(printf 'SHA-256:\n```\n%s\n```\n' "$(sha256sum *.zip)")
           checksums="${checksums//'%'/'%25'}"
           checksums="${checksums//$'\n'/'%0A'}"
@@ -73,18 +63,12 @@ jobs:
           git tag "$new_tag"
           git push --tags
           echo "::set-output name=tag_name::$new_tag"
-      - name: Publish bootstrap zips to GitHub release
+      - name: Publish GitHub release
         uses: termux/upload-release-action@v3.0.3
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: "*.zip"
           file_glob: true
-          release_name: "Bootstrap archives for Termux application"
+          release_name: "Bootstrap archives for Termux application (apt-android-5)"
           tag: ${{ steps.get_tag.outputs.tag_name }}
           body: ${{ steps.get_checksums.outputs.checksums }}
-      - name: Publish bootstraps sha256sum to GitHub release
-        uses: termux/upload-release-action@v3.0.3
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: "bootstraps.sha256sum"
-          tag: ${{ steps.get_tag.outputs.tag_name }}
